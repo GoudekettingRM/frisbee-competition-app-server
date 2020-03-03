@@ -12,4 +12,19 @@ router.post("/teams", async (req, res, next) => {
   }
 });
 
+router.get("/teams", async (req, res, next) => {
+  try {
+    const teams = await Team.findAll();
+    if (!teams.length) {
+      res
+        .status(404)
+        .send({ message: "No teams found" })
+        .end();
+    } else {
+      res.json(teams);
+    }
+  } catch (err) {
+    next(err);
+  }
+});
 module.exports = router;
