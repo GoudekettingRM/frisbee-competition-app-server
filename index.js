@@ -5,7 +5,9 @@ const app = express();
 const port = process.env.PORT || 4000;
 
 // ----------------------------- FUNCTIONS GO HERE --------------------------- //
-function onListen() {console.log(`Listening on port ${port}!`);}
+function onListen() {
+  console.log(`Listening on port ${port}!`);
+}
 
 // ----------------------------- MIDDLEWARE GOES HERE--------------------------- //
 const corsMiddleware = cors();
