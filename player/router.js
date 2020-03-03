@@ -1,5 +1,6 @@
 const { Router } = require("express");
 const bcrypt = require("bcrypt");
+const { toJWT } = require("../auth/jwt");
 const Player = require("./model");
 
 const router = new Router();
@@ -11,8 +12,11 @@ router.post("/players", async (req, res, next) => {
     const player = await Player.create(newPlayerData);
 
     const { password, ...playerInfo } = player.dataValues;
-
-    res.json(playerInfo);
+    res.json({
+      message: "Sign up successful.",
+      jwt: toJWT({ playerId: player.id }),
+      player: { ...playerInfo }
+    });
   } catch (err) {
     next(err);
   }
