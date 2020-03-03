@@ -1,5 +1,6 @@
 const Sequelize = require("sequelize");
 const db = require("../db");
+const Role = require("../role/model");
 
 const Player = db.define("player", {
   firstName: {
@@ -20,5 +21,8 @@ const Player = db.define("player", {
     allowNull: false
   }
 });
+
+Player.belongsTo(Role);
+Role.hasMany(Player);
 
 module.exports = Player;

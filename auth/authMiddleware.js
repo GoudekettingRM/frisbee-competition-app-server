@@ -1,6 +1,13 @@
 const User = require("../player/model");
 const { toData } = require("./jwt");
 
+function blockEndpoint(req, res, next) {
+  res
+    .status(403)
+    .send({ message: "Endpoint blocked" })
+    .end();
+}
+
 function auth(req, res, next) {
   const auth =
     req.headers.authorization && req.headers.authorization.split(" ");
@@ -31,4 +38,4 @@ function auth(req, res, next) {
     });
   }
 }
-module.exports = { auth };
+module.exports = { auth, blockEndpoint };
