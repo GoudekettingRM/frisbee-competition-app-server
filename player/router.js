@@ -20,23 +20,15 @@ router.post("/players", async (req, res, next) => {
 
 router.get("/players", async (req, res, next) => {
   try {
-    if (!Object.keys(req.body).length) {
-      const allPlayers = await Player.findAll();
-      if (!allPlayers.length) {
-        res
-          .status(404)
-          .send({ message: "No players found" })
-          .end();
-      }
-      const allPlayersWithoutPassword = allPlayers.map(player => {
-        const { password, ...playerWithoutPassword } = player.dataValues;
-        return playerWithoutPassword;
-      });
-
-      res.json(allPlayersWithoutPassword);
+    const teamId = req.query.teamId || null;
+    if (!teamId) {
+      res
+        .status(400)
+        .send({ message: "Please provide a team ID" })
+        .end();
     } else {
       const teamPlayers = await Player.findAll({
-        where: { teamId: req.body.teamId }
+        where: { teamId }
       });
       if (!teamPlayers.length) {
         res
