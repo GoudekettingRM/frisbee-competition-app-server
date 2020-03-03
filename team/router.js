@@ -27,4 +27,20 @@ router.get("/teams", async (req, res, next) => {
     next(err);
   }
 });
+
+router.get("/teams/:id", async (req, res, next) => {
+  try {
+    const teamId = req.params.id;
+    const team = await Team.findByPk(teamId);
+    if (!team) {
+      res
+        .status(404)
+        .send({ message: "Team not found" })
+        .end();
+    }
+    res.json(team);
+  } catch (err) {
+    next(err);
+  }
+});
 module.exports = router;
