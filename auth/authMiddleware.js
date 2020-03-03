@@ -1,4 +1,4 @@
-const User = require("../player/model");
+const Player = require("../player/model");
 const { toData } = require("./jwt");
 
 function blockEndpoint(req, res, next) {
@@ -15,15 +15,15 @@ function auth(req, res, next) {
     try {
       const data = toData(auth[1]);
 
-      User.findByPk(data.userId)
-        .then(user => {
-          if (!user) {
+      Player.findByPk(data.playerId)
+        .then(player => {
+          if (!player) {
             res
               .status(401)
               .send({ message: "Please supply valid credentials" })
               .end();
           }
-          req.user = user;
+          req.player = player;
           next();
         })
         .catch(next);
