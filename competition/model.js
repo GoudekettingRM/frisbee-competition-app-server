@@ -1,6 +1,7 @@
 const Sequelize = require("sequelize");
 const db = require("../db");
 const Team = require("../team/model");
+const CompetitionDay = require("../competition-day/model");
 
 const Competition = db.define("competition", {
   name: {
@@ -30,6 +31,8 @@ const Competition = db.define("competition", {
   }
 });
 
+CompetitionDay.belongsTo(Competition);
+Competition.hasMany(CompetitionDay);
 Competition.belongsToMany(Team, { through: "teamsInCompetitions" });
 Team.belongsToMany(Competition, { through: "teamsInCompetitions" });
 
