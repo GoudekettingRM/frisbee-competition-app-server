@@ -2,12 +2,9 @@ const Sequelize = require("sequelize");
 const db = require("../db");
 const Role = require("../role/model");
 const Team = require("../team/model");
+const Organisation = require("../organisation/model");
 
 const User = db.define("user", {
-  organisationName: {
-    type: Sequelize.STRING,
-    allowNull: true
-  },
   firstName: {
     type: Sequelize.STRING,
     allowNull: false
@@ -31,5 +28,7 @@ User.belongsTo(Role);
 Role.hasMany(User);
 User.belongsTo(Team);
 Team.hasMany(User);
+User.belongsTo(Organisation);
+Organisation.hasMany(User);
 
 module.exports = User;

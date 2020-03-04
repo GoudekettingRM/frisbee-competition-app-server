@@ -2,12 +2,19 @@ const { Router } = require("express");
 const { auth } = require("../auth/authMiddleware");
 const Team = require("./model");
 const User = require("../user/model");
+const {
+  federation,
+  clubBoard,
+  teamCaptain,
+  spiritCaptain,
+  player
+} = require("../endpointRoles");
 
 const router = new Router();
 
 router.post("/teams", auth, async (req, res, next) => {
   try {
-    const rolesAllowed = [4, 5];
+    const rolesAllowed = [federation, clubBoard];
     if (rolesAllowed.includes(req.user.roleId)) {
       const team = await Team.create(req.body);
       res.json(team);
