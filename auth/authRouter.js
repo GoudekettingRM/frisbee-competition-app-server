@@ -1,15 +1,15 @@
 const { Router } = require("express");
 const bcrypt = require("bcrypt");
-const Player = require("../player/model");
+const User = require("../user/model");
 const { toJWT } = require("./jwt");
 
 const router = new Router();
 
-//To enable login for administrators and players through the same endpoint, uncomment all the comments below and remove line 12 (const accountTable = Player;)
+//To enable login for administrators and users through the same endpoint, uncomment all the comments below and remove line 12 (const accountTable = User;)
 router.post("/login" /*/:accountType"*/, async (req, res, next) => {
   // const accountType = req.params.accountType || "normal";
-  // const accountTable = accountType === "normal" ? Player : Administrator;
-  const accountTable = Player;
+  // const accountTable = accountType === "normal" ? User : Administrator;
+  const accountTable = User;
   const { password, email } = req.body;
   if (!password || !email) {
     res
@@ -19,23 +19,23 @@ router.post("/login" /*/:accountType"*/, async (req, res, next) => {
   }
 
   try {
-    const player = await accountTable.findOne({
+    const user = await accountTable.findOne({
       where: {
         email
       }
     });
-    if (!player) {
+    if (!user) {
       res
         .status(401)
         .send({ message: "Please supply valid credentials" })
         .end();
-    } else if (bcrypt.compareSync(password, player.password)) {
-      const { password, ...playerData } = player.dataValues;
+    } else if (bcrypt.compareSync(password, user.password)) {
+      const { password, ...userData } = user.dataValues;
       res
         .send({
           message: "Login successful.",
-          jwt: toJWT({ playerId: player.id }),
-          player: { ...playerData }
+          jwt: toJWT({ userId: user.id }),
+          user: { ...userData }
         })
         .end();
     } else {

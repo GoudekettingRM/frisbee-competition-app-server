@@ -1,6 +1,6 @@
 const { Router } = require("express");
 const Team = require("./model");
-const Player = require("../player/model");
+const User = require("../user/model");
 
 const router = new Router();
 
@@ -33,7 +33,7 @@ router.get("/teams/:id", async (req, res, next) => {
   try {
     const teamId = req.params.id;
     const team = await Team.findByPk(teamId, {
-      include: [{ model: Player, attributes: ["firstName", "lastName"] }]
+      include: [{ model: User, attributes: ["firstName", "lastName"] }]
     });
     if (!team) {
       res

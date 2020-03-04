@@ -1,8 +1,13 @@
 const Sequelize = require("sequelize");
 const db = require("../db");
 const Role = require("../role/model");
+const Team = require("../team/model");
 
-const Player = db.define("player", {
+const User = db.define("user", {
+  organisationName: {
+    type: Sequelize.STRING,
+    allowNull: false
+  },
   firstName: {
     type: Sequelize.STRING,
     allowNull: false
@@ -22,7 +27,9 @@ const Player = db.define("player", {
   }
 });
 
-Player.belongsTo(Role);
-Role.hasMany(Player);
+User.belongsTo(Role);
+Role.hasMany(User);
+User.belongsTo(Team);
+Team.hasMany(User);
 
-module.exports = Player;
+module.exports = User;
