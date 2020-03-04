@@ -14,15 +14,18 @@ const router = new Router();
 
 router.post("/teams", auth, async (req, res, next) => {
   try {
-    const rolesAllowed = [federation, clubBoard];
-    if (rolesAllowed.includes(req.user.roleId)) {
-      const team = await Team.create(req.body);
-      res.json(team);
-    } else {
+    if (!req.user.organisationId) {
       res
         .status(403)
-        .send({ message: "You are not allowed to perform this action" })
+        .send({ message: "User not authorized to perform this action." })
         .end();
+    } else {
+      const newTeamData = {
+        ...req.body,
+        organisationId: req.user.organisationId
+      };
+      const team = await Team.create(newTeamData);
+      res.json(team);
     }
   } catch (err) {
     next(err);
