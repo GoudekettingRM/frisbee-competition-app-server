@@ -6,7 +6,7 @@ const Team = require("../team/model");
 const User = db.define("user", {
   organisationName: {
     type: Sequelize.STRING,
-    allowNull: false
+    allowNull: true
   },
   firstName: {
     type: Sequelize.STRING,
