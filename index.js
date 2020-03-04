@@ -7,6 +7,8 @@ const userRouter = require("./user/router");
 const teamRouter = require("./team/router");
 const competitionRouter = require("./competition/router");
 const organisationRouter = require("./organisation/router");
+const competitionDayRouter = require("./competition-day/router");
+const gameRouter = require("./game/router");
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -30,5 +32,7 @@ app.use(userRouter);
 app.use(teamRouter);
 app.use(competitionRouter);
 app.use(organisationRouter);
+app.use(competitionDayRouter);
+app.use(gameRouter);
 
 app.listen(port, onListen);
