@@ -2,13 +2,6 @@ const { Router } = require("express");
 const { auth } = require("../auth/authMiddleware");
 const Team = require("./model");
 const User = require("../user/model");
-const {
-  federation,
-  clubBoard,
-  teamCaptain,
-  spiritCaptain,
-  player
-} = require("../endpointRoles");
 
 const router = new Router();
 
