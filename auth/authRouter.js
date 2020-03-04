@@ -1,7 +1,9 @@
 const { Router } = require("express");
 const bcrypt = require("bcrypt");
-const User = require("../user/model");
 const { toJWT } = require("./jwt");
+const User = require("../user/model");
+const Organisation = require("../organisation/model");
+const Team = require("../team/model");
 
 const router = new Router();
 
@@ -18,7 +20,8 @@ router.post("/login", async (req, res, next) => {
     const user = await User.findOne({
       where: {
         email
-      }
+      },
+      include: [Organisation, Team]
     });
     if (!user) {
       res
