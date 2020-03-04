@@ -1,13 +1,22 @@
 const { Router } = require("express");
+const { auth } = require("../auth/authMiddleware");
 const Team = require("./model");
 const User = require("../user/model");
 
 const router = new Router();
 
-router.post("/teams", async (req, res, next) => {
+router.post("/teams", auth, async (req, res, next) => {
   try {
-    const team = await Team.create(req.body);
-    res.json(team);
+    const rolesAllowed = [4, 5];
+    if (rolesAllowed.includes(req.user.roleId)) {
+      const team = await Team.create(req.body);
+      res.json(team);
+    } else {
+      res
+        .status(403)
+        .send({ message: "You are not allowed to perform this action" })
+        .end();
+    }
   } catch (err) {
     next(err);
   }

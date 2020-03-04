@@ -5,11 +5,7 @@ const { toJWT } = require("./jwt");
 
 const router = new Router();
 
-//To enable login for administrators and users through the same endpoint, uncomment all the comments below and remove line 12 (const accountTable = User;)
-router.post("/login" /*/:accountType"*/, async (req, res, next) => {
-  // const accountType = req.params.accountType || "normal";
-  // const accountTable = accountType === "normal" ? User : Administrator;
-  const accountTable = User;
+router.post("/login", async (req, res, next) => {
   const { password, email } = req.body;
   if (!password || !email) {
     res
@@ -19,7 +15,7 @@ router.post("/login" /*/:accountType"*/, async (req, res, next) => {
   }
 
   try {
-    const user = await accountTable.findOne({
+    const user = await User.findOne({
       where: {
         email
       }
