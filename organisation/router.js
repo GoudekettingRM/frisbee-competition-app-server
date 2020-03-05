@@ -2,6 +2,9 @@ const { Router } = require("express");
 const { auth } = require("../auth/authMiddleware");
 const Organisation = require("./model");
 const User = require("../user/model");
+const Competition = require("../competition/model");
+const CompetitionDay = require("../competition-day/model");
+const Team = require("../team/model");
 
 const router = new Router();
 
@@ -16,14 +19,23 @@ router.post("/organisations", auth, async (req, res, next) => {
         .end();
     }
     const newOrganisation = await Organisation.create(req.body);
-    const updatedUser = await User.update(
+    await User.update(
       { organisationId: newOrganisation.id },
       { where: { id: req.user.id } }
     );
+
+    const updatedUser = await User.findByPk(req.user.id, {
+      include: [
+        {
+          model: Organisation,
+          include: [{ model: Competition, include: [CompetitionDay] }]
+        },
+        Team
+      ]
+    });
     res.json({
       message:
         "New organisation created successfully. User has been registered as contact for organisation.",
-      newOrganisation,
       updatedUser
     });
   } catch (error) {
