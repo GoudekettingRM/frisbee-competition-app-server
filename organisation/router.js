@@ -24,19 +24,16 @@ router.post("/organisations", auth, async (req, res, next) => {
       { where: { id: req.user.id } }
     );
 
-    const updatedUser = await User.findByPk(req.user.id, {
-      include: [
-        {
-          model: Organisation,
-          include: [{ model: Competition, include: [CompetitionDay] }]
-        },
-        Team
-      ]
-    });
+    const completeNewOrganisation = await Organisation.findByPk(
+      newOrganisation.id,
+      {
+        include: [{ model: Competition, include: [CompetitionDay] }]
+      }
+    );
     res.json({
       message:
         "New organisation created successfully. User has been registered as contact for organisation.",
-      updatedUser
+      newOrganisation: completeNewOrganisation
     });
   } catch (error) {
     next(error);
