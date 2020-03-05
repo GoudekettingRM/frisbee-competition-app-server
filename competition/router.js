@@ -61,4 +61,22 @@ router.post("/competitions", auth, async (req, res, next) => {
   }
 });
 
+router.get("/competitions", async (req, res, next) => {
+  try {
+    const competitions = await Competition.findAll({
+      include: [CompetitionDay]
+    });
+    if (!competitions.length) {
+      res
+        .status(404)
+        .send({ message: "No competitions found" })
+        .end();
+    } else {
+      res.json(competitions);
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;
