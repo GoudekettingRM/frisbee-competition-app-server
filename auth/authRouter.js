@@ -4,6 +4,8 @@ const { toJWT } = require("./jwt");
 const User = require("../user/model");
 const Organisation = require("../organisation/model");
 const Team = require("../team/model");
+const Competition = require("../competition/model");
+const CompetitionDay = require("../competition-day/model");
 
 const router = new Router();
 
@@ -21,7 +23,13 @@ router.post("/login", async (req, res, next) => {
       where: {
         email
       },
-      include: [Organisation, Team]
+      include: [
+        {
+          model: Organisation,
+          include: [{ model: Competition, include: [CompetitionDay] }]
+        },
+        Team
+      ]
     });
     if (!user) {
       res
