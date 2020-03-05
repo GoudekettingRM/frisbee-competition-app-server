@@ -1,7 +1,10 @@
 const { Router } = require("express");
 const bcrypt = require("bcrypt");
 const { toJWT } = require("../auth/jwt");
+const { auth } = require("../auth/authMiddleware");
 const User = require("./model");
+const Organisation = require("../organisation/model");
+const Team = require("../team/model");
 
 const router = new Router();
 
@@ -33,7 +36,8 @@ router.get("/users", async (req, res, next) => {
         .end();
     } else {
       const teamUsers = await User.findAll({
-        where: { teamId }
+        where: { teamId },
+        include: [Organisation, Team]
       });
       if (!teamUsers.length) {
         res
@@ -50,6 +54,25 @@ router.get("/users", async (req, res, next) => {
     }
   } catch (err) {
     next(err);
+  }
+});
+
+router.patch("/users", auth, async (req, res, next) => {
+  try {
+    console.log("req.body test in patch users endpoint", req.body);
+    await User.update(req.body, {
+      where: { id: req.user.id }
+    });
+    const updatedUser = await User.findByPk(req.user.id, {
+      include: [Organisation, Team]
+    });
+
+    res.json({
+      message: "User updated successfully",
+      updatedUser
+    });
+  } catch (error) {
+    next(error);
   }
 });
 
