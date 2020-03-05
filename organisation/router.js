@@ -31,4 +31,22 @@ router.post("/organisations", auth, async (req, res, next) => {
   }
 });
 
+router.patch("/organisations", auth, async (req, res, next) => {
+  try {
+    console.log("req.user in organisations patch", req.user.organisation.id);
+    await Organisation.update(req.body, {
+      where: {
+        id: req.user.organisation.id
+      }
+    });
+    const updatedOrganisation = await Organisation.findByPk(
+      req.user.organisation.id
+    );
+    console.log("updatedOrganisation test", updatedOrganisation);
+    res.json(updatedOrganisation);
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;

@@ -1,4 +1,6 @@
 const User = require("../user/model");
+const Organisation = require("../organisation/model");
+const Team = require("../team/model");
 const { toData } = require("./jwt");
 
 function blockEndpoint(req, res, next) {
@@ -15,7 +17,7 @@ function auth(req, res, next) {
     try {
       const data = toData(auth[1]);
 
-      User.findByPk(data.userId)
+      User.findByPk(data.userId, { include: [Organisation, Team] })
         .then(user => {
           if (!user) {
             res
