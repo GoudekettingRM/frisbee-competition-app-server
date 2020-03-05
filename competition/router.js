@@ -16,22 +16,28 @@ router.post("/competitions", auth, async (req, res, next) => {
   try {
     const rolesAllowed = [federation];
     if (rolesAllowed.includes(req.user.organisation.roleId)) {
-      const newCompetition = await Competition.create(req.body);
+      const newComp = await Competition.create(req.body);
 
       const competitionDays = req.body.competitionDayDates;
 
-      const newCompetitionDays = Promise.all(
-        competitionDays.forEach(
+      await Promise.all(
+        competitionDays.map(
           async date =>
             await CompetitionDay.create({
               date,
-              competitionId: newCompetition.id
+              competitionId: newComp.id
             })
         )
       );
-      console.log("competitionDays test", newCompetitionDays);
 
-      res.json(newCompetition);
+      const newCompetition = await Competition.findByPk(newComp.id, {
+        include: [CompetitionDay]
+      });
+
+      res.json({
+        message: "New competition created successfully",
+        newCompetition
+      });
     } else {
       res
         .status(403)
