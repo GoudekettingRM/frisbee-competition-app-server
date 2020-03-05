@@ -16,28 +16,38 @@ router.post("/competitions", auth, async (req, res, next) => {
   try {
     const rolesAllowed = [federation];
     if (rolesAllowed.includes(req.user.organisation.roleId)) {
-      const newComp = await Competition.create(req.body);
+      const newCompetitionReference = await Competition.create(req.body);
 
-      const competitionDays = req.body.competitionDayDates;
+      if (!req.body.competitionDayDates.length) {
+        res.json({
+          message: "Competition created. NB: No competition days were added.",
+          newCompetition: newCompetitionReference
+        });
+      } else {
+        const competitionDays = req.body.competitionDayDates;
 
-      await Promise.all(
-        competitionDays.map(
-          async date =>
-            await CompetitionDay.create({
-              date,
-              competitionId: newComp.id
-            })
-        )
-      );
+        await Promise.all(
+          competitionDays.map(
+            async date =>
+              await CompetitionDay.create({
+                date,
+                competitionId: newCompetitionReference.id
+              })
+          )
+        );
 
-      const newCompetition = await Competition.findByPk(newComp.id, {
-        include: [CompetitionDay]
-      });
+        const newCompetition = await Competition.findByPk(
+          newCompetitionReference.id,
+          {
+            include: [CompetitionDay]
+          }
+        );
 
-      res.json({
-        message: "New competition created successfully",
-        newCompetition
-      });
+        res.json({
+          message: "New competition created successfully",
+          newCompetition
+        });
+      }
     } else {
       res
         .status(403)
