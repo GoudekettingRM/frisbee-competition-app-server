@@ -2,6 +2,7 @@ const { Router } = require("express");
 const { auth } = require("../auth/authMiddleware");
 const Team = require("./model");
 const User = require("../user/model");
+const Competition = require("../competition/model");
 
 const router = new Router();
 
@@ -13,11 +14,17 @@ router.post("/teams", auth, async (req, res, next) => {
         .send({ message: "User not authorized to perform this action." })
         .end();
     } else {
+      const currentCompetition = await Competition.findByPk(
+        req.body.competitionId
+      );
+      //------------------------------- Create data in the through table --------------------- //
       const newTeamData = {
         ...req.body,
         organisationId: req.user.organisationId
       };
       const team = await Team.create(newTeamData);
+      team.setCompetitions([currentCompetition]);
+
       res.json(team);
     }
   } catch (err) {

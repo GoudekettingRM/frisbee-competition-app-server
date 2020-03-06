@@ -2,6 +2,7 @@ const { Router } = require("express");
 const { auth } = require("../auth/authMiddleware");
 const Competition = require("./model");
 const CompetitionDay = require("../competition-day/model");
+const Team = require("../team/model");
 const {
   federation,
   clubBoard,
@@ -64,7 +65,7 @@ router.post("/competitions", auth, async (req, res, next) => {
 router.get("/competitions", async (req, res, next) => {
   try {
     const competitions = await Competition.findAll({
-      include: [CompetitionDay]
+      include: [CompetitionDay, Team]
     });
     if (!competitions.length) {
       res
