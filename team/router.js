@@ -17,7 +17,14 @@ router.post("/teams", auth, async (req, res, next) => {
       const currentCompetition = await Competition.findByPk(
         req.body.competitionId
       );
-      //------------------------------- Create data in the through table --------------------- //
+
+      if (!currentCompetition) {
+        res
+          .status(404)
+          .send({ message: "Requested competition not found." })
+          .end();
+      }
+
       const newTeamData = {
         ...req.body,
         organisationId: req.user.organisationId
