@@ -3,13 +3,7 @@ const { auth } = require("../auth/authMiddleware");
 const Competition = require("./model");
 const CompetitionDay = require("../competition-day/model");
 const Team = require("../team/model");
-const {
-  federation,
-  clubBoard,
-  teamCaptain,
-  spiritCaptain,
-  player
-} = require("../endpointRoles");
+const { federation } = require("../endpointRoles");
 
 const router = new Router();
 
