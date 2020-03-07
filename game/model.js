@@ -27,6 +27,14 @@ const Game = db.define("game", {
     type: Sequelize.STRING,
     allowNull: false
   },
+  lat: {
+    type: Sequelize.FLOAT,
+    allowNull: false
+  },
+  lng: {
+    type: Sequelize.FLOAT,
+    allowNull: false
+  },
   startTime: {
     type: Sequelize.TIME,
     allowNull: false

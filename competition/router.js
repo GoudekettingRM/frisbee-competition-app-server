@@ -59,7 +59,7 @@ router.post("/competitions", auth, async (req, res, next) => {
 router.get("/competitions", async (req, res, next) => {
   try {
     const competitions = await Competition.findAll({
-      include: [CompetitionDay, Team]
+      include: [CompetitionDay, { model: Team, include: [Competition] }]
     });
     if (!competitions.length) {
       res
