@@ -35,22 +35,24 @@ router.post("/games", auth, async (req, res, next) => {
         .end();
     }
 
-    const competitionByUserOrganisation = userOrganisation.competitions.find(
-      competition => competition.dataValues.id === req.body.competitionId
-    );
+    const competitionEditableByUser =
+      user.roleId === superAdmin
+        ? true
+        : userOrganisation.competitions.find(
+            competition => competition.dataValues.id === req.body.competitionId
+          );
     const rolesAllowed = [federation, superAdmin];
     if (
       rolesAllowed.includes(userOrganisation.roleId) &&
-      competitionByUserOrganisation
+      competitionEditableByUser
     ) {
-      //This assumes that the request contains the competitionDayId and the competition id.
       const newGame = await Game.create(req.body);
       return res.json(newGame);
     } else {
       console.log(
         "Post game request failed, user role not in allowed roles or competition not by user's organisation:",
         userOrganisation.roleId,
-        competitionByUserOrganisation
+        competitionEditableByUser
       );
 
       return res
