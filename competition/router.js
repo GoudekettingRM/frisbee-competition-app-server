@@ -14,7 +14,7 @@ router.post("/competitions", auth, async (req, res, next) => {
       const newCompetitionReference = await Competition.create(req.body);
 
       if (!req.body.competitionDayDates.length) {
-        res.json({
+        return res.json({
           message: "Competition created. NB: No competition days were added.",
           newCompetition: newCompetitionReference
         });
@@ -34,17 +34,17 @@ router.post("/competitions", auth, async (req, res, next) => {
         const newCompetition = await Competition.findByPk(
           newCompetitionReference.id,
           {
-            include: [CompetitionDay]
+            include: [CompetitionDay, { model: Team, include: [Competition] }]
           }
         );
 
-        res.json({
+        return res.json({
           message: "New competition created successfully",
           newCompetition
         });
       }
     } else {
-      res
+      return res
         .status(403)
         .send({
           message: "This can only be done by a federation admin account."
@@ -62,12 +62,12 @@ router.get("/competitions", async (req, res, next) => {
       include: [CompetitionDay, { model: Team, include: [Competition] }]
     });
     if (!competitions.length) {
-      res
+      return res
         .status(404)
         .send({ message: "No competitions found" })
         .end();
     } else {
-      res.json(competitions);
+      return res.json(competitions);
     }
   } catch (error) {
     next(error);
@@ -80,12 +80,12 @@ router.get("/competitions/:id", async (req, res, next) => {
       include: [CompetitionDay, { model: Team, include: [Competition] }]
     });
     if (!competition) {
-      res
+      return res
         .status(404)
         .send({ message: "Competition not found" })
         .end();
     } else {
-      res.json(competition);
+      return res.json(competition);
     }
   } catch (error) {
     next(error);
