@@ -74,4 +74,22 @@ router.get("/competitions", async (req, res, next) => {
   }
 });
 
+router.get("/competitions/:id", async (req, res, next) => {
+  try {
+    const competition = await Competition.findByPk(req.params.id, {
+      include: [CompetitionDay, { model: Team, include: [Competition] }]
+    });
+    if (!competition) {
+      res
+        .status(404)
+        .send({ message: "Competition not found" })
+        .end();
+    } else {
+      res.json(competition);
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;
