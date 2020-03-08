@@ -3,13 +3,13 @@ const { auth } = require("../auth/authMiddleware");
 const Competition = require("./model");
 const CompetitionDay = require("../competition-day/model");
 const Team = require("../team/model");
-const { federation } = require("../endpointRoles");
+const { federation, superAdmin } = require("../endpointRoles");
 
 const router = new Router();
 
 router.post("/competitions", auth, async (req, res, next) => {
   try {
-    const rolesAllowed = [federation];
+    const rolesAllowed = [federation, superAdmin];
     if (rolesAllowed.includes(req.user.organisation.roleId)) {
       const newCompetitionReference = await Competition.create(req.body);
 
@@ -47,7 +47,7 @@ router.post("/competitions", auth, async (req, res, next) => {
       return res
         .status(403)
         .send({
-          message: "This can only be done by a federation admin account."
+          message: "This can only be done by a federation / admin account."
         })
         .end();
     }
