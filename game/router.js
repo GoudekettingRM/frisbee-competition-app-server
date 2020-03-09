@@ -3,6 +3,7 @@ const { auth } = require("../auth/authMiddleware");
 const Game = require("./model");
 const Organisation = require("../organisation/model");
 const Competition = require("../competition/model");
+const Team = require("../team/model");
 const { federation, superAdmin } = require("../endpointRoles");
 
 const router = new Router();
@@ -60,6 +61,28 @@ router.post("/games", auth, async (req, res, next) => {
           .end();
       }
     }
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/games/:id", async (req, res, next) => {
+  try {
+    const gameId = req.params.id;
+    const game = await Game.findByPk(gameId, {
+      include: [
+        Competition,
+        { model: Team, as: "homeTeam" },
+        { model: Team, as: "awayTeam" }
+      ]
+    });
+    if (!game)
+      return res
+        .status(404)
+        .send({ message: "Game not found" })
+        .end();
+
+    res.send(game);
   } catch (error) {
     next(error);
   }

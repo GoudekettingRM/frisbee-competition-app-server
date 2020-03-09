@@ -5,22 +5,10 @@ const Competition = require("../competition/model");
 const CompetitionDay = require("../competition-day/model");
 
 const Game = db.define("game", {
-  homeTeamId: {
-    type: Sequelize.INTEGER,
-    references: {
-      model: Team,
-      key: "id"
-    }
-  },
+  // homeTeamId: Sequelize.INTEGER,
   homeTeamScore: Sequelize.INTEGER,
   homeTeamReceivedSpiritScore: Sequelize.INTEGER,
-  awayTeamId: {
-    type: Sequelize.INTEGER,
-    references: {
-      model: Team,
-      key: "id"
-    }
-  },
+  // awayTeamId: Sequelize.INTEGER,
   awayTeamScore: Sequelize.INTEGER,
   awayTeamReceivedSpiritScore: Sequelize.INTEGER,
   location: {
@@ -43,6 +31,8 @@ const Game = db.define("game", {
 
 Game.belongsTo(Competition);
 Game.belongsTo(CompetitionDay);
+Game.belongsTo(Team, { as: "homeTeam" });
+Game.belongsTo(Team, { as: "awayTeam" });
 Competition.hasMany(Game);
 CompetitionDay.hasMany(Game);
 
