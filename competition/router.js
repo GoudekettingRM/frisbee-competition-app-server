@@ -64,7 +64,17 @@ router.post("/competitions", auth, async (req, res, next) => {
 router.get("/competitions", async (req, res, next) => {
   try {
     const competitions = await Competition.findAll({
-      include: [CompetitionDay, { model: Team, include: [Competition] }, Game]
+      include: [
+        CompetitionDay,
+        { model: Team, include: [Competition] },
+        {
+          model: Game,
+          include: [
+            { model: Team, as: "homeTeam" },
+            { model: Team, as: "awayTeam" }
+          ]
+        }
+      ]
     });
     if (!competitions.length) {
       return res
@@ -82,7 +92,17 @@ router.get("/competitions", async (req, res, next) => {
 router.get("/competitions/:id", async (req, res, next) => {
   try {
     const competition = await Competition.findByPk(req.params.id, {
-      include: [CompetitionDay, { model: Team, include: [Competition] }, Game]
+      include: [
+        CompetitionDay,
+        { model: Team, include: [Competition] },
+        {
+          model: Game,
+          include: [
+            { model: Team, as: "homeTeam" },
+            { model: Team, as: "awayTeam" }
+          ]
+        }
+      ]
     });
     if (!competition) {
       return res
