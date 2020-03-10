@@ -3,6 +3,7 @@ const { auth } = require("../auth/authMiddleware");
 const Game = require("./model");
 const Organisation = require("../organisation/model");
 const Competition = require("../competition/model");
+const CompetitionDay = require("../competition-day/model");
 const Team = require("../team/model");
 const { federation, superAdmin } = require("../endpointRoles");
 
@@ -73,7 +74,8 @@ router.get("/games/:id", async (req, res, next) => {
       include: [
         Competition,
         { model: Team, as: "homeTeam" },
-        { model: Team, as: "awayTeam" }
+        { model: Team, as: "awayTeam" },
+        CompetitionDay
       ]
     });
     if (!game)

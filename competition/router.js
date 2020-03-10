@@ -71,7 +71,8 @@ router.get("/competitions", async (req, res, next) => {
           model: Game,
           include: [
             { model: Team, as: "homeTeam" },
-            { model: Team, as: "awayTeam" }
+            { model: Team, as: "awayTeam" },
+            CompetitionDay
           ]
         }
       ]
@@ -99,7 +100,8 @@ router.get("/competitions/:id", async (req, res, next) => {
           model: Game,
           include: [
             { model: Team, as: "homeTeam" },
-            { model: Team, as: "awayTeam" }
+            { model: Team, as: "awayTeam" },
+            CompetitionDay
           ]
         }
       ]

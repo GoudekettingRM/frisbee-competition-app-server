@@ -9,6 +9,7 @@ const competitionRouter = require("./competition/router");
 const organisationRouter = require("./organisation/router");
 const competitionDayRouter = require("./competition-day/router");
 const gameRouter = require("./game/router");
+const spiritScoreRouter = require("./spirit-score/router");
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -34,5 +35,6 @@ app.use(competitionRouter);
 app.use(organisationRouter);
 app.use(competitionDayRouter);
 app.use(gameRouter);
+app.use(spiritScoreRouter);
 
 app.listen(port, onListen);

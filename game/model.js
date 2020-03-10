@@ -3,14 +3,11 @@ const db = require("../db");
 const Team = require("../team/model");
 const Competition = require("../competition/model");
 const CompetitionDay = require("../competition-day/model");
+const SpiritScore = require("../spirit-score/model");
 
 const Game = db.define("game", {
-  // homeTeamId: Sequelize.INTEGER,
   homeTeamScore: Sequelize.INTEGER,
-  homeTeamReceivedSpiritScore: Sequelize.INTEGER,
-  // awayTeamId: Sequelize.INTEGER,
   awayTeamScore: Sequelize.INTEGER,
-  awayTeamReceivedSpiritScore: Sequelize.INTEGER,
   location: {
     type: Sequelize.STRING,
     allowNull: false
@@ -29,6 +26,8 @@ const Game = db.define("game", {
   }
 });
 
+Game.belongsTo(SpiritScore, { as: "homeTeamSpiritReceivedScore" });
+Game.belongsTo(SpiritScore, { as: "awayTeamSpiritReceivedScore" });
 Game.belongsTo(Competition);
 Game.belongsTo(CompetitionDay);
 Game.belongsTo(Team, { as: "homeTeam" });
