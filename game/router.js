@@ -7,18 +7,33 @@ const CompetitionDay = require("../competition-day/model");
 const Team = require("../team/model");
 const SpiritScore = require("../spirit-score/model");
 const { return403, return404 } = require("../returnStatusCodes");
-const { federation, superAdmin } = require("../endpointRoles");
+const {
+  spiritCaptain,
+  teamCaptain,
+  clubBoard,
+  federation,
+  superAdmin
+} = require("../endpointRoles");
 
 const router = new Router();
 
 router.post("/games", auth, async (req, res, next) => {
   try {
     if (req.user.roleId === superAdmin) {
-      const newGame = await Game.create(req.body);
+      const createdGame = await Game.create(req.body);
+      const newGame = await Game.findByPk(createdGame.id, {
+        include: [
+          Competition,
+          { model: Team, as: "homeTeam" },
+          { model: Team, as: "awayTeam" },
+          CompetitionDay,
+          { model: SpiritScore, as: "homeTeamReceivedSpiritScore" },
+          { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
+        ]
+      });
       return res.json(newGame);
     } else {
       if (!req.user.organisationId) {
-        console.log("Post game request failed, no organisation ID");
         return return403(res);
       }
 
@@ -30,8 +45,6 @@ router.post("/games", auth, async (req, res, next) => {
       );
 
       if (!userOrganisation) {
-        console.log("Post game request failed, no organisation found");
-
         return return404(res, "Linked organisation not found");
       }
 
@@ -43,7 +56,17 @@ router.post("/games", auth, async (req, res, next) => {
         rolesAllowed.includes(userOrganisation.roleId) &&
         competitionByUserOrganisation
       ) {
-        const newGame = await Game.create(req.body);
+        const createdGame = await Game.create(req.body);
+        const newGame = await Game.findByPk(createdGame.id, {
+          include: [
+            Competition,
+            { model: Team, as: "homeTeam" },
+            { model: Team, as: "awayTeam" },
+            CompetitionDay,
+            { model: SpiritScore, as: "homeTeamReceivedSpiritScore" },
+            { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
+          ]
+        });
         return res.json(newGame);
       } else {
         return return403(res);
@@ -70,6 +93,46 @@ router.get("/games/:id", async (req, res, next) => {
     if (!game) return return404(res, "Game not found");
 
     res.send(game);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.patch("/games/:id", auth, auth, async (req, res, next) => {
+  try {
+    console.log("req.body:", req.body);
+    const rolesAllowed = [
+      spiritCaptain,
+      teamCaptain,
+      clubBoard,
+      federation,
+      superAdmin
+    ];
+    const gameId = req.params.id;
+
+    const userRoleId = req.user.organisation
+      ? req.user.organisation.roleId
+      : req.user.roleId;
+
+    if (rolesAllowed.includes(userRoleId)) {
+      await Game.update(req.body, {
+        where: { id: gameId }
+      });
+      const updatedGame = await Game.findByPk(gameId, {
+        include: [
+          Competition,
+          { model: Team, as: "homeTeam" },
+          { model: Team, as: "awayTeam" },
+          CompetitionDay,
+          { model: SpiritScore, as: "homeTeamReceivedSpiritScore" },
+          { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
+        ]
+      });
+      console.log("updated game:", updatedGame);
+      return res.send(updatedGame);
+    } else {
+      return return403(res);
+    }
   } catch (error) {
     next(error);
   }
