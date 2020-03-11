@@ -15,23 +15,31 @@ const {
 } = require("../endpointRoles");
 
 async function createSpiritScoreInDbAndSendResponse(
+  req,
   res,
   spiritTotal,
-  spiritForTeamId
+  spiritForTeamId,
+  homeOrAway
 ) {
   const spiritData = {
     ...req.body,
     spiritTotal,
     teamId: spiritForTeamId
   };
-  const newSpiritScore = await SpiritScore.create(spiritData);
-  await gameToScore.update({
-    homeTeamReceivedSpiritScoreId: newSpiritScore.id,
-    homeTeamScore: req.body.homeTeamScore,
-    awayTeamScore: req.body.awayTeamScore
-  });
 
-  const updatedGame = await Game.findByPk(gameId, {
+  const spiritReceiver =
+    homeOrAway === "home"
+      ? "homeTeamReceivedSpiritScoreId"
+      : "awayTeamReceivedSpiritScoreId";
+  const newSpiritScore = await SpiritScore.create(spiritData);
+  await Game.update(
+    {
+      [spiritReceiver]: newSpiritScore.id
+    },
+    { where: { id: req.body.gameId } }
+  );
+
+  const updatedGame = await Game.findByPk(req.body.gameId, {
     include: [
       Competition,
       { model: Team, as: "homeTeam" },
@@ -47,19 +55,16 @@ async function createSpiritScoreInDbAndSendResponse(
 
 const router = new Router();
 
-router.post("/games/:id", auth, async (req, res, next) => {
+router.post("/spirit-scores", auth, async (req, res, next) => {
   try {
     console.log("req.body:", req.body);
     const admins = [federation, superAdmin];
     const teamUsers = [spiritCaptain, teamCaptain, clubBoard];
-    const gameId = req.params.id;
-
     const userRoleId = req.user.organisation
       ? req.user.organisation.roleId
       : req.user.roleId;
 
-    const gameToScore = await Game.findByPk(gameId);
-    console.log("gameToScore", gameToScore.dataValues);
+    const gameToScore = await Game.findByPk(req.body.gameId);
 
     const { RKUScore, FNBScore, FMScore, PASCScore, COMMScore } = req.body;
     const spiritTotal = RKUScore + FNBScore + FMScore + PASCScore + COMMScore;
@@ -67,31 +72,43 @@ router.post("/games/:id", auth, async (req, res, next) => {
     if (admins.includes(userRoleId)) {
       if (req.body.spiritScoreFor === "home") {
         if (gameToScore.homeTeamReceivedSpiritScoreId) {
+          console.log("1");
+
           return return409(res);
         } else {
+          console.log("2");
           return createSpiritScoreInDbAndSendResponse(
+            req,
             res,
             spiritTotal,
-            gameToScore.homeTeamId
+            gameToScore.homeTeamId,
+            "home"
           );
         }
       } else {
         if (gameToScore.awayTeamReceivedSpiritScoreId) {
+          console.log("3");
           return return409(res);
         } else {
+          console.log("4");
           return createSpiritScoreInDbAndSendResponse(
+            req,
             res,
             spiritTotal,
-            gameToScore.awayTeamId
+            gameToScore.awayTeamId,
+            "away"
           );
         }
       }
     } else if (teamUsers.includes(userRoleId)) {
       if (req.user.teamId === gameToScore.homeTeamId) {
         if (gameToScore.awayTeamReceivedSpiritScoreId) {
+          console.log("5");
           return return409(res);
         } else {
+          console.log("6");
           return createSpiritScoreInDbAndSendResponse(
+            req,
             res,
             spiritTotal,
             gameToScore.awayTeamId
@@ -99,18 +116,23 @@ router.post("/games/:id", auth, async (req, res, next) => {
         }
       } else if (req.user.teamId === gameToScore.awayTeamId) {
         if (gameToScore.homeTeamReceivedSpiritScoreId) {
+          console.log("7");
           return return409(res);
         } else {
+          console.log("8");
           return createSpiritScoreInDbAndSendResponse(
+            req,
             res,
             spiritTotal,
             gameToScore.homeTeamId
           );
         }
       } else {
+        console.log("9");
         return return403(res);
       }
     } else {
+      console.log("10");
       return return403(res);
     }
   } catch (error) {
