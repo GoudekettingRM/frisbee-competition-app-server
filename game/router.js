@@ -5,6 +5,8 @@ const Organisation = require("../organisation/model");
 const Competition = require("../competition/model");
 const CompetitionDay = require("../competition-day/model");
 const Team = require("../team/model");
+const SpiritScore = require("../spirit-score/model");
+const { return403, return404 } = require("../returnStatusCodes");
 const { federation, superAdmin } = require("../endpointRoles");
 
 const router = new Router();
@@ -17,10 +19,7 @@ router.post("/games", auth, async (req, res, next) => {
     } else {
       if (!req.user.organisationId) {
         console.log("Post game request failed, no organisation ID");
-        return res
-          .status(403)
-          .send({ message: "User not authorized to perform this action." })
-          .end();
+        return return403(res);
       }
 
       const userOrganisation = await Organisation.findByPk(
@@ -33,10 +32,7 @@ router.post("/games", auth, async (req, res, next) => {
       if (!userOrganisation) {
         console.log("Post game request failed, no organisation found");
 
-        return res
-          .status(404)
-          .send({ message: "Linked organisation not found" })
-          .end();
+        return return404(res, "Linked organisation not found");
       }
 
       const competitionByUserOrganisation = userOrganisation.competitions.find(
@@ -50,16 +46,7 @@ router.post("/games", auth, async (req, res, next) => {
         const newGame = await Game.create(req.body);
         return res.json(newGame);
       } else {
-        console.log(
-          "Post game request failed, user role not in allowed roles or competition not by user's organisation:",
-          userOrganisation.roleId,
-          competitionByUserOrganisation
-        );
-
-        return res
-          .status(403)
-          .send({ message: "User not authorized to perform this action." })
-          .end();
+        return return403(res);
       }
     }
   } catch (error) {
@@ -75,14 +62,12 @@ router.get("/games/:id", async (req, res, next) => {
         Competition,
         { model: Team, as: "homeTeam" },
         { model: Team, as: "awayTeam" },
-        CompetitionDay
+        CompetitionDay,
+        { model: SpiritScore, as: "homeTeamReceivedSpiritScore" },
+        { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
       ]
     });
-    if (!game)
-      return res
-        .status(404)
-        .send({ message: "Game not found" })
-        .end();
+    if (!game) return return404(res, "Game not found");
 
     res.send(game);
   } catch (error) {

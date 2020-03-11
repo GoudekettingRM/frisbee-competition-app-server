@@ -5,6 +5,7 @@ const { auth } = require("../auth/authMiddleware");
 const User = require("./model");
 const Organisation = require("../organisation/model");
 const Team = require("../team/model");
+const { return400, return404 } = require("../returnStatusCodes");
 
 const router = new Router();
 
@@ -30,20 +31,14 @@ router.get("/users", async (req, res, next) => {
   try {
     const teamId = req.query.teamId || null;
     if (!teamId) {
-      res
-        .status(400)
-        .send({ message: "Please provide a team ID" })
-        .end();
+      return return400(res, "Team ID missing.");
     } else {
       const teamUsers = await User.findAll({
         where: { teamId },
         include: [Organisation, Team]
       });
       if (!teamUsers.length) {
-        res
-          .status(404)
-          .send({ message: "No users found" })
-          .end();
+        return return404(res, "No users found");
       }
       const teamUsersWithoutPassword = teamUsers.map(user => {
         const { password, ...userWithoutPassword } = user.dataValues;
@@ -59,7 +54,6 @@ router.get("/users", async (req, res, next) => {
 
 router.patch("/users", auth, async (req, res, next) => {
   try {
-    console.log("req.body test in patch users endpoint", req.body);
     await User.update(req.body, {
       where: { id: req.user.id }
     });

@@ -5,18 +5,14 @@ const User = require("../user/model");
 const Competition = require("../competition/model");
 const CompetitionDay = require("../competition-day/model");
 const Team = require("../team/model");
+const { return400 } = require("../returnStatusCodes");
 
 const router = new Router();
 
 router.post("/organisations", auth, async (req, res, next) => {
   try {
     if (req.user.organisationId) {
-      res
-        .status(400)
-        .send({
-          message: `New organisation not created. User already is the contact for another organisation.`
-        })
-        .end();
+      return return400(res, "User already contact for one organisation");
     }
     const newOrganisation = await Organisation.create(req.body);
     await User.update(

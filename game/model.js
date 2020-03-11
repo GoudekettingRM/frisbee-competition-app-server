@@ -26,8 +26,8 @@ const Game = db.define("game", {
   }
 });
 
-Game.belongsTo(SpiritScore, { as: "homeTeamSpiritReceivedScore" });
-Game.belongsTo(SpiritScore, { as: "awayTeamSpiritReceivedScore" });
+Game.belongsTo(SpiritScore, { as: "homeTeamReceivedSpiritScore" });
+Game.belongsTo(SpiritScore, { as: "awayTeamReceivedSpiritScore" });
 Game.belongsTo(Competition);
 Game.belongsTo(CompetitionDay);
 Game.belongsTo(Team, { as: "homeTeam" });

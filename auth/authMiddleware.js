@@ -2,12 +2,10 @@ const User = require("../user/model");
 const Organisation = require("../organisation/model");
 const Team = require("../team/model");
 const { toData } = require("./jwt");
+const { return400, return401, return403 } = require("../returnStatusCodes");
 
 function blockEndpoint(req, res, next) {
-  res
-    .status(403)
-    .send({ message: "Endpoint blocked" })
-    .end();
+  return return403(res);
 }
 
 function auth(req, res, next) {
@@ -20,24 +18,17 @@ function auth(req, res, next) {
       User.findByPk(data.userId, { include: [Organisation, Team] })
         .then(user => {
           if (!user) {
-            res
-              .status(401)
-              .send({ message: "Please supply valid credentials" })
-              .end();
+            return return401(res);
           }
           req.user = user;
           next();
         })
         .catch(next);
     } catch (error) {
-      res.status(400).send({
-        message: `Error ${error.name}: ${error.message}`
-      });
+      return return400(res, `${error.name}: ${error.message}`);
     }
   } else {
-    res.status(401).send({
-      message: "Please supply some valid credentials"
-    });
+    return return401(res);
   }
 }
 module.exports = { auth, blockEndpoint };

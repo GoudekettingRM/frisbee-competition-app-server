@@ -6,18 +6,15 @@ const Organisation = require("../organisation/model");
 const Team = require("../team/model");
 const Competition = require("../competition/model");
 const CompetitionDay = require("../competition-day/model");
+const { return400, return401 } = require("../returnStatusCodes");
 
 const router = new Router();
 
 router.post("/login", async (req, res, next) => {
   const { password, email } = req.body;
   if (!password || !email) {
-    res
-      .status(400)
-      .send({ message: "Please provide valid credentials to login." })
-      .end();
+    return return400(res, "No login data provided.");
   }
-
   try {
     const user = await User.findOne({
       where: {
@@ -32,10 +29,7 @@ router.post("/login", async (req, res, next) => {
       ]
     });
     if (!user) {
-      res
-        .status(401)
-        .send({ message: "Please supply valid credentials" })
-        .end();
+      return return401(res);
     } else if (bcrypt.compareSync(password, user.password)) {
       const { password, ...userData } = user.dataValues;
       res
@@ -46,10 +40,7 @@ router.post("/login", async (req, res, next) => {
         })
         .end();
     } else {
-      res
-        .status(401)
-        .send({ message: "Please supply some valid credentials" })
-        .end();
+      return return401(res);
     }
   } catch (error) {
     next(error);

@@ -4,26 +4,21 @@ const Team = require("./model");
 const User = require("../user/model");
 const Competition = require("../competition/model");
 const { superAdmin } = require("../endpointRoles");
+const { return403, return404 } = require("../returnStatusCodes");
 
 const router = new Router();
 
 router.post("/teams", auth, async (req, res, next) => {
   try {
     if (!req.user.organisationId && req.user.roleId !== superAdmin) {
-      return res
-        .status(403)
-        .send({ message: "User not authorized to perform this action." })
-        .end();
+      return return403(res);
     } else {
       const currentCompetition = await Competition.findByPk(
         req.body.competitionId
       );
 
       if (!currentCompetition) {
-        return res
-          .status(404)
-          .send({ message: "Requested competition not found." })
-          .end();
+        return return404(res, "Competition for team creation not found");
       }
 
       const newTeamData = {
@@ -44,10 +39,7 @@ router.get("/teams", async (req, res, next) => {
   try {
     const teams = await Team.findAll();
     if (!teams.length) {
-      return res
-        .status(404)
-        .send({ message: "No teams found" })
-        .end();
+      return return404(res, "Teams not found");
     } else {
       res.json(teams);
     }
@@ -63,14 +55,12 @@ router.get("/teams/:id", async (req, res, next) => {
       include: [{ model: User, attributes: ["firstName", "lastName"] }]
     });
     if (!team) {
-      return res
-        .status(404)
-        .send({ message: "Team not found" })
-        .end();
+      return return404(res, "Team not found");
     }
     res.json(team);
   } catch (err) {
     next(err);
   }
 });
+
 module.exports = router;

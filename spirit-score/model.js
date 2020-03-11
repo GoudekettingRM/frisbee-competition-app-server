@@ -3,6 +3,7 @@ const db = require("../db");
 const Team = require("../team/model");
 
 const SpiritScore = db.define("spiritScore", {
+  spiritTotal: Sequelize.INTEGER,
   RKUScore: Sequelize.INTEGER,
   RKUComment: Sequelize.TEXT,
   FNBScore: Sequelize.INTEGER,

@@ -4,6 +4,7 @@ const Competition = require("./model");
 const CompetitionDay = require("../competition-day/model");
 const Team = require("../team/model");
 const Game = require("../game/model");
+const { return403, return404 } = require("../returnStatusCodes");
 const { federation, superAdmin } = require("../endpointRoles");
 
 const router = new Router();
@@ -49,12 +50,7 @@ router.post("/competitions", auth, async (req, res, next) => {
         });
       }
     } else {
-      return res
-        .status(403)
-        .send({
-          message: "This can only be done by a federation / admin account."
-        })
-        .end();
+      return return403(res);
     }
   } catch (error) {
     next(error);
@@ -78,10 +74,7 @@ router.get("/competitions", async (req, res, next) => {
       ]
     });
     if (!competitions.length) {
-      return res
-        .status(404)
-        .send({ message: "No competitions found" })
-        .end();
+      return return404(res, "No competition found");
     } else {
       return res.json(competitions);
     }
@@ -107,10 +100,7 @@ router.get("/competitions/:id", async (req, res, next) => {
       ]
     });
     if (!competition) {
-      return res
-        .status(404)
-        .send({ message: "Competition not found" })
-        .end();
+      return return404(res, "Competition not found");
     } else {
       return res.json(competition);
     }
