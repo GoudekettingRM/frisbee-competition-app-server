@@ -8,6 +8,7 @@ const Team = require("../team/model");
 const User = require("../user/model");
 const SpiritScore = require("../spirit-score/model");
 const { return400, return403, return404 } = require("../returnStatusCodes");
+const { getUserRole } = require("../rbac-helpers");
 const {
   spiritCaptain,
   teamCaptain,
@@ -104,9 +105,7 @@ router.patch("/games/:id", auth, async (req, res, next) => {
     const admins = [federation, superAdmin];
     const teamUsers = [spiritCaptain, teamCaptain, clubBoard];
     const gameId = req.params.id;
-    const userRoleId = req.user.organisation
-      ? req.user.organisation.roleId
-      : req.user.roleId;
+    const userRoleId = getUserRole(req.user);
 
     const gameToUpdate = await Game.findByPk(gameId, {
       include: [

@@ -7,6 +7,7 @@ const CompetitionDay = require("../competition-day/model");
 const Team = require("../team/model");
 const User = require("../user/model");
 const { return403, return409 } = require("../returnStatusCodes");
+const { getUserRole } = require("../rbac-helpers");
 const {
   teamCaptain,
   spiritCaptain,
@@ -101,9 +102,7 @@ router.post("/spirit-scores", auth, async (req, res, next) => {
     // console.log("req.body from spirit scores POST:", req.body);
     const admins = [federation, superAdmin];
     const teamUsers = [spiritCaptain, teamCaptain, clubBoard];
-    const userRoleId = req.user.organisation
-      ? req.user.organisation.roleId
-      : req.user.roleId;
+    const userRoleId = getUserRole(req.user);
 
     const gameToScore = await Game.findByPk(req.body.gameId);
 
@@ -176,9 +175,7 @@ router.patch("/spirit-scores/:id", auth, async (req, res, next) => {
     const admins = [federation, superAdmin];
     const teamUsers = [spiritCaptain, teamCaptain, clubBoard];
     const spiritScoreId = req.params.id;
-    const userRoleId = req.user.organisation
-      ? req.user.organisation.roleId
-      : req.user.roleId;
+    const userRoleId = getUserRole(req.user);
 
     const { RKUScore, FNBScore, FMScore, PASCScore, COMMScore } = req.body;
     const spiritTotal = RKUScore + FNBScore + FMScore + PASCScore + COMMScore;
