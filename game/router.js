@@ -100,27 +100,64 @@ router.get("/games/:id", async (req, res, next) => {
 
 router.patch("/games/:id", auth, async (req, res, next) => {
   try {
-    const rolesAllowed = [
-      spiritCaptain,
-      teamCaptain,
-      clubBoard,
-      federation,
-      superAdmin
-    ];
+    const admins = [federation, superAdmin];
+    const teamUsers = [spiritCaptain, teamCaptain, clubBoard];
     const gameId = req.params.id;
-
-    if (req.headers.scoring) {
-      if (!req.body.homeTeamScore || !req.body.awayTeamScore)
-        return return400(
-          res,
-          "Scoring a game needs a home team score and an away team score."
-        );
-    }
     const userRoleId = req.user.organisation
       ? req.user.organisation.roleId
       : req.user.roleId;
 
-    if (rolesAllowed.includes(userRoleId)) {
+    const gameToUpdate = await Game.findByPk(gameId, {
+      include: [
+        { model: Team, as: "homeTeam" },
+        { model: Team, as: "awayTeam" }
+      ]
+    });
+
+    if (req.headers.scoring) {
+      if (!req.body.homeTeamScore || !req.body.awayTeamScore) {
+        return return400(
+          res,
+          "Scoring a game needs a home team score and an away team score."
+        );
+      } else {
+        const { homeTeam, awayTeam } = gameToUpdate;
+        const teamByUserOrganisation =
+          userRoleId === clubBoard
+            ? homeTeam.organisationId === user.organisationId ||
+              awayTeam.organisationId === user.organisationId
+              ? true
+              : false
+            : false;
+
+        if (
+          admins.includes(userRoleId) ||
+          (teamUsers.includes(userRoleId) &&
+            (req.user.teamId === gameToUpdate.homeTeamId ||
+              req.user.teamId === gameToUpdate.awayTeamId ||
+              teamByUserOrganisation))
+        ) {
+          await Game.update(
+            {
+              homeTeamScore: req.body.homeTeamScore,
+              awayTeamScore: req.body.awayTeamScore
+            },
+            { where: { id: gameId } }
+          );
+        }
+        const updatedGame = await Game.findByPk(gameId, {
+          include: [
+            Competition,
+            { model: Team, as: "homeTeam" },
+            { model: Team, as: "awayTeam" },
+            CompetitionDay,
+            { model: SpiritScore, as: "homeTeamReceivedSpiritScore" },
+            { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
+          ]
+        });
+        return res.send(updatedGame);
+      }
+    } else if (admins.includes(userRoleId)) {
       await Game.update(req.body, {
         where: { id: gameId }
       });

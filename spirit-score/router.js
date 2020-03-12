@@ -52,6 +52,46 @@ async function createSpiritScoreInDbAndSendResponse(
 
   res.json(updatedGame);
 }
+async function updateSpiritInDbAndSendResponse(
+  res,
+  updatedSpiritData,
+  spiritScoreId,
+  gameId
+) {
+  await SpiritScore.update(updatedSpiritData, {
+    where: { id: spiritScoreId }
+  });
+  const gameWithUpdatedSpirit = await Game.findByPk(gameId, {
+    include: [
+      Competition,
+      { model: Team, as: "homeTeam" },
+      { model: Team, as: "awayTeam" },
+      CompetitionDay,
+      { model: SpiritScore, as: "homeTeamReceivedSpiritScore" },
+      { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
+    ]
+  });
+  return res.json(gameWithUpdatedSpirit);
+}
+function allowedToEditSpiritScore(spiritScoreFor, user, game, userRoleId) {
+  if (userRoleId === spiritCaptain || userRoleId === teamCaptain) {
+    if (
+      (spiritScoreFor === "home" && user.teamId === game.awayTeamId) ||
+      (spiritScoreFor === "away" && user.teamId === game.homeTeamId)
+    ) {
+      return true;
+    }
+  } else if (userRoleId === clubBoard) {
+    if (
+      (spiritScoreFor === "home" &&
+        game.awayTeam.organisationId === user.organisationId) ||
+      (spiritScoreFor === "away" &&
+        game.homeTeam.organisationId === user.organisationId)
+    ) {
+      return true;
+    }
+  } else return false;
+}
 
 const router = new Router();
 
@@ -148,25 +188,36 @@ router.patch("/spirit-scores/:id", auth, async (req, res, next) => {
     };
 
     if (admins.includes(userRoleId)) {
-      await SpiritScore.update(updatedSpiritData, {
-        where: { id: spiritScoreId }
-      });
-      const gameWithUpdatedSpirit = await Game.findByPk(req.body.gameId, {
+      updateSpiritInDbAndSendResponse(
+        res,
+        updatedSpiritData,
+        spiritScoreId,
+        req.body.gameId
+      );
+    } else if (teamUsers.includes(userRoleId)) {
+      console.log("Need to check if user is okay");
+      const game = await Game.findByPk(req.body.gameId, {
         include: [
-          Competition,
           { model: Team, as: "homeTeam" },
-          { model: Team, as: "awayTeam" },
-          CompetitionDay,
-          { model: SpiritScore, as: "homeTeamReceivedSpiritScore" },
-          { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
+          { model: Team, as: "awayTeam" }
         ]
       });
-      return res.json(gameWithUpdatedSpirit);
-    } else if (teamUsers.includes(userRoleId)) {
-      //check if the user in the team that played against the team that received this spirit score in the match that this spirit score was given.
-    } else {
-      return return403(res);
-    }
+      if (
+        allowedToEditSpiritScore(
+          req.body.spiritScoreFor,
+          req.user,
+          game,
+          userRoleId
+        )
+      ) {
+        updateSpiritInDbAndSendResponse(
+          res,
+          updatedSpiritData,
+          spiritScoreId,
+          req.body.gameId
+        );
+      } else return return403(res);
+    } else return return403(res);
   } catch (error) {
     next(error);
   }
