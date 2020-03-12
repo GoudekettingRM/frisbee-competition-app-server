@@ -5,6 +5,7 @@ const CompetitionDay = require("../competition-day/model");
 const Team = require("../team/model");
 const Game = require("../game/model");
 const SpiritScore = require("../spirit-score/model");
+const User = require("../user/model");
 const { return403, return404 } = require("../returnStatusCodes");
 const { federation, superAdmin } = require("../endpointRoles");
 
@@ -63,7 +64,7 @@ router.get("/competitions", async (req, res, next) => {
     const competitions = await Competition.findAll({
       include: [
         CompetitionDay,
-        { model: Team, include: [Competition] },
+        { model: Team, include: [Competition, User] },
         {
           model: Game,
           include: [
@@ -91,7 +92,7 @@ router.get("/competitions/:id", async (req, res, next) => {
     const competition = await Competition.findByPk(req.params.id, {
       include: [
         CompetitionDay,
-        { model: Team, include: [Competition] },
+        { model: Team, include: [Competition, User] },
         {
           model: Game,
           include: [

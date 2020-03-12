@@ -5,6 +5,7 @@ const Organisation = require("../organisation/model");
 const Competition = require("../competition/model");
 const CompetitionDay = require("../competition-day/model");
 const Team = require("../team/model");
+const User = require("../user/model");
 const SpiritScore = require("../spirit-score/model");
 const { return400, return403, return404 } = require("../returnStatusCodes");
 const {
@@ -24,8 +25,8 @@ router.post("/games", auth, async (req, res, next) => {
       const newGame = await Game.findByPk(createdGame.id, {
         include: [
           Competition,
-          { model: Team, as: "homeTeam" },
-          { model: Team, as: "awayTeam" },
+          { model: Team, as: "homeTeam", include: [User] },
+          { model: Team, as: "awayTeam", include: [User] },
           CompetitionDay,
           { model: SpiritScore, as: "homeTeamReceivedSpiritScore" },
           { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
@@ -60,8 +61,8 @@ router.post("/games", auth, async (req, res, next) => {
         const newGame = await Game.findByPk(createdGame.id, {
           include: [
             Competition,
-            { model: Team, as: "homeTeam" },
-            { model: Team, as: "awayTeam" },
+            { model: Team, as: "homeTeam", include: [User] },
+            { model: Team, as: "awayTeam", include: [User] },
             CompetitionDay,
             { model: SpiritScore, as: "homeTeamReceivedSpiritScore" },
             { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
@@ -83,8 +84,8 @@ router.get("/games/:id", async (req, res, next) => {
     const game = await Game.findByPk(gameId, {
       include: [
         Competition,
-        { model: Team, as: "homeTeam" },
-        { model: Team, as: "awayTeam" },
+        { model: Team, as: "homeTeam", include: [User] },
+        { model: Team, as: "awayTeam", include: [User] },
         CompetitionDay,
         { model: SpiritScore, as: "homeTeamReceivedSpiritScore" },
         { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
@@ -148,8 +149,8 @@ router.patch("/games/:id", auth, async (req, res, next) => {
         const updatedGame = await Game.findByPk(gameId, {
           include: [
             Competition,
-            { model: Team, as: "homeTeam" },
-            { model: Team, as: "awayTeam" },
+            { model: Team, as: "homeTeam", include: [User] },
+            { model: Team, as: "awayTeam", include: [User] },
             CompetitionDay,
             { model: SpiritScore, as: "homeTeamReceivedSpiritScore" },
             { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
@@ -164,8 +165,8 @@ router.patch("/games/:id", auth, async (req, res, next) => {
       const updatedGame = await Game.findByPk(gameId, {
         include: [
           Competition,
-          { model: Team, as: "homeTeam" },
-          { model: Team, as: "awayTeam" },
+          { model: Team, as: "homeTeam", include: [User] },
+          { model: Team, as: "awayTeam", include: [User] },
           CompetitionDay,
           { model: SpiritScore, as: "homeTeamReceivedSpiritScore" },
           { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }

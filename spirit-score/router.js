@@ -5,6 +5,7 @@ const Game = require("../game/model");
 const Competition = require("../competition/model");
 const CompetitionDay = require("../competition-day/model");
 const Team = require("../team/model");
+const User = require("../user/model");
 const { return403, return409 } = require("../returnStatusCodes");
 const {
   teamCaptain,
@@ -42,8 +43,8 @@ async function createSpiritScoreInDbAndSendResponse(
   const updatedGame = await Game.findByPk(req.body.gameId, {
     include: [
       Competition,
-      { model: Team, as: "homeTeam" },
-      { model: Team, as: "awayTeam" },
+      { model: Team, as: "homeTeam", include: [User] },
+      { model: Team, as: "awayTeam", include: [User] },
       CompetitionDay,
       { model: SpiritScore, as: "homeTeamReceivedSpiritScore" },
       { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
@@ -64,8 +65,8 @@ async function updateSpiritInDbAndSendResponse(
   const gameWithUpdatedSpirit = await Game.findByPk(gameId, {
     include: [
       Competition,
-      { model: Team, as: "homeTeam" },
-      { model: Team, as: "awayTeam" },
+      { model: Team, as: "homeTeam", include: [User] },
+      { model: Team, as: "awayTeam", include: [User] },
       CompetitionDay,
       { model: SpiritScore, as: "homeTeamReceivedSpiritScore" },
       { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
