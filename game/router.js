@@ -124,8 +124,8 @@ router.patch("/games/:id", auth, async (req, res, next) => {
         const { homeTeam, awayTeam } = gameToUpdate;
         const teamByUserOrganisation =
           userRoleId === clubBoard
-            ? homeTeam.organisationId === user.organisationId ||
-              awayTeam.organisationId === user.organisationId
+            ? homeTeam.organisationId === req.user.organisationId ||
+              awayTeam.organisationId === req.user.organisationId
               ? true
               : false
             : false;
