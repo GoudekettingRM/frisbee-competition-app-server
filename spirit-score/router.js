@@ -57,7 +57,7 @@ const router = new Router();
 
 router.post("/spirit-scores", auth, async (req, res, next) => {
   try {
-    console.log("req.body:", req.body);
+    // console.log("req.body from spirit scores POST:", req.body);
     const admins = [federation, superAdmin];
     const teamUsers = [spiritCaptain, teamCaptain, clubBoard];
     const userRoleId = req.user.organisation
@@ -72,11 +72,8 @@ router.post("/spirit-scores", auth, async (req, res, next) => {
     if (admins.includes(userRoleId)) {
       if (req.body.spiritScoreFor === "home") {
         if (gameToScore.homeTeamReceivedSpiritScoreId) {
-          console.log("1");
-
           return return409(res);
         } else {
-          console.log("2");
           return createSpiritScoreInDbAndSendResponse(
             req,
             res,
@@ -87,10 +84,8 @@ router.post("/spirit-scores", auth, async (req, res, next) => {
         }
       } else {
         if (gameToScore.awayTeamReceivedSpiritScoreId) {
-          console.log("3");
           return return409(res);
         } else {
-          console.log("4");
           return createSpiritScoreInDbAndSendResponse(
             req,
             res,
@@ -103,10 +98,8 @@ router.post("/spirit-scores", auth, async (req, res, next) => {
     } else if (teamUsers.includes(userRoleId)) {
       if (req.user.teamId === gameToScore.homeTeamId) {
         if (gameToScore.awayTeamReceivedSpiritScoreId) {
-          console.log("5");
           return return409(res);
         } else {
-          console.log("6");
           return createSpiritScoreInDbAndSendResponse(
             req,
             res,
@@ -116,10 +109,8 @@ router.post("/spirit-scores", auth, async (req, res, next) => {
         }
       } else if (req.user.teamId === gameToScore.awayTeamId) {
         if (gameToScore.homeTeamReceivedSpiritScoreId) {
-          console.log("7");
           return return409(res);
         } else {
-          console.log("8");
           return createSpiritScoreInDbAndSendResponse(
             req,
             res,
@@ -128,11 +119,52 @@ router.post("/spirit-scores", auth, async (req, res, next) => {
           );
         }
       } else {
-        console.log("9");
         return return403(res);
       }
     } else {
-      console.log("10");
+      return return403(res);
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.patch("/spirit-scores/:id", auth, async (req, res, next) => {
+  try {
+    console.log("Req.body from spirit-score PATCH", req.body);
+    const admins = [federation, superAdmin];
+    const teamUsers = [spiritCaptain, teamCaptain, clubBoard];
+    const spiritScoreId = req.params.id;
+    const userRoleId = req.user.organisation
+      ? req.user.organisation.roleId
+      : req.user.roleId;
+
+    const { RKUScore, FNBScore, FMScore, PASCScore, COMMScore } = req.body;
+    const spiritTotal = RKUScore + FNBScore + FMScore + PASCScore + COMMScore;
+
+    const updatedSpiritData = {
+      ...req.body,
+      spiritTotal
+    };
+
+    if (admins.includes(userRoleId)) {
+      await SpiritScore.update(updatedSpiritData, {
+        where: { id: spiritScoreId }
+      });
+      const gameWithUpdatedSpirit = await Game.findByPk(req.body.gameId, {
+        include: [
+          Competition,
+          { model: Team, as: "homeTeam" },
+          { model: Team, as: "awayTeam" },
+          CompetitionDay,
+          { model: SpiritScore, as: "homeTeamReceivedSpiritScore" },
+          { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
+        ]
+      });
+      return res.json(gameWithUpdatedSpirit);
+    } else if (teamUsers.includes(userRoleId)) {
+      //check if the user in the team that played against the team that received this spirit score in the match that this spirit score was given.
+    } else {
       return return403(res);
     }
   } catch (error) {

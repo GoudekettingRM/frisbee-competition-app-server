@@ -4,6 +4,7 @@ const Competition = require("./model");
 const CompetitionDay = require("../competition-day/model");
 const Team = require("../team/model");
 const Game = require("../game/model");
+const SpiritScore = require("../spirit-score/model");
 const { return403, return404 } = require("../returnStatusCodes");
 const { federation, superAdmin } = require("../endpointRoles");
 
@@ -68,7 +69,9 @@ router.get("/competitions", async (req, res, next) => {
           include: [
             { model: Team, as: "homeTeam" },
             { model: Team, as: "awayTeam" },
-            CompetitionDay
+            CompetitionDay,
+            { model: SpiritScore, as: "homeTeamReceivedSpiritScore" },
+            { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
           ]
         }
       ]
@@ -94,7 +97,9 @@ router.get("/competitions/:id", async (req, res, next) => {
           include: [
             { model: Team, as: "homeTeam" },
             { model: Team, as: "awayTeam" },
-            CompetitionDay
+            CompetitionDay,
+            { model: SpiritScore, as: "homeTeamReceivedSpiritScore" },
+            { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
           ]
         }
       ]

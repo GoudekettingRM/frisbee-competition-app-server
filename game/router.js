@@ -6,7 +6,7 @@ const Competition = require("../competition/model");
 const CompetitionDay = require("../competition-day/model");
 const Team = require("../team/model");
 const SpiritScore = require("../spirit-score/model");
-const { return403, return404 } = require("../returnStatusCodes");
+const { return400, return403, return404 } = require("../returnStatusCodes");
 const {
   spiritCaptain,
   teamCaptain,
@@ -98,9 +98,8 @@ router.get("/games/:id", async (req, res, next) => {
   }
 });
 
-router.patch("/games/:id", auth, auth, async (req, res, next) => {
+router.patch("/games/:id", auth, async (req, res, next) => {
   try {
-    console.log("req.body:", req.body);
     const rolesAllowed = [
       spiritCaptain,
       teamCaptain,
@@ -110,6 +109,13 @@ router.patch("/games/:id", auth, auth, async (req, res, next) => {
     ];
     const gameId = req.params.id;
 
+    if (req.headers.scoring) {
+      if (!req.body.homeTeamScore || !req.body.awayTeamScore)
+        return return400(
+          res,
+          "Scoring a game needs a home team score and an away team score."
+        );
+    }
     const userRoleId = req.user.organisation
       ? req.user.organisation.roleId
       : req.user.roleId;
@@ -128,7 +134,6 @@ router.patch("/games/:id", auth, auth, async (req, res, next) => {
           { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
         ]
       });
-      console.log("updated game:", updatedGame);
       return res.send(updatedGame);
     } else {
       return return403(res);
