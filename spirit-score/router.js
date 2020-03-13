@@ -5,7 +5,9 @@ const Game = require("../game/model");
 const Competition = require("../competition/model");
 const CompetitionDay = require("../competition-day/model");
 const Team = require("../team/model");
+const User = require("../user/model");
 const { return403, return409 } = require("../returnStatusCodes");
+const { getUserRole } = require("../rbac-helpers");
 const {
   teamCaptain,
   spiritCaptain,
@@ -42,15 +44,15 @@ async function createSpiritScoreInDbAndSendResponse(
   const updatedGame = await Game.findByPk(req.body.gameId, {
     include: [
       Competition,
-      { model: Team, as: "homeTeam" },
-      { model: Team, as: "awayTeam" },
+      { model: Team, as: "homeTeam", include: [User] },
+      { model: Team, as: "awayTeam", include: [User] },
       CompetitionDay,
       { model: SpiritScore, as: "homeTeamReceivedSpiritScore" },
       { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
     ]
   });
 
-  res.json(updatedGame);
+  res.json({ message: "Spirit score added successfully", updatedGame });
 }
 async function updateSpiritInDbAndSendResponse(
   res,
@@ -61,17 +63,20 @@ async function updateSpiritInDbAndSendResponse(
   await SpiritScore.update(updatedSpiritData, {
     where: { id: spiritScoreId }
   });
-  const gameWithUpdatedSpirit = await Game.findByPk(gameId, {
+  const updatedGame = await Game.findByPk(gameId, {
     include: [
       Competition,
-      { model: Team, as: "homeTeam" },
-      { model: Team, as: "awayTeam" },
+      { model: Team, as: "homeTeam", include: [User] },
+      { model: Team, as: "awayTeam", include: [User] },
       CompetitionDay,
       { model: SpiritScore, as: "homeTeamReceivedSpiritScore" },
       { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
     ]
   });
-  return res.json(gameWithUpdatedSpirit);
+  return res.json({
+    message: "Spirit score updated successfully",
+    updatedGame
+  });
 }
 function allowedToEditSpiritScore(spiritScoreFor, user, game, userRoleId) {
   if (userRoleId === spiritCaptain || userRoleId === teamCaptain) {
@@ -100,9 +105,7 @@ router.post("/spirit-scores", auth, async (req, res, next) => {
     // console.log("req.body from spirit scores POST:", req.body);
     const admins = [federation, superAdmin];
     const teamUsers = [spiritCaptain, teamCaptain, clubBoard];
-    const userRoleId = req.user.organisation
-      ? req.user.organisation.roleId
-      : req.user.roleId;
+    const userRoleId = getUserRole(req.user);
 
     const gameToScore = await Game.findByPk(req.body.gameId);
 
@@ -171,13 +174,11 @@ router.post("/spirit-scores", auth, async (req, res, next) => {
 
 router.patch("/spirit-scores/:id", auth, async (req, res, next) => {
   try {
-    console.log("Req.body from spirit-score PATCH", req.body);
+    // console.log("Req.body from spirit-score PATCH", req.body);
     const admins = [federation, superAdmin];
     const teamUsers = [spiritCaptain, teamCaptain, clubBoard];
     const spiritScoreId = req.params.id;
-    const userRoleId = req.user.organisation
-      ? req.user.organisation.roleId
-      : req.user.roleId;
+    const userRoleId = getUserRole(req.user);
 
     const { RKUScore, FNBScore, FMScore, PASCScore, COMMScore } = req.body;
     const spiritTotal = RKUScore + FNBScore + FMScore + PASCScore + COMMScore;
@@ -195,7 +196,7 @@ router.patch("/spirit-scores/:id", auth, async (req, res, next) => {
         req.body.gameId
       );
     } else if (teamUsers.includes(userRoleId)) {
-      console.log("Need to check if user is okay");
+      // console.log("Need to check if user is okay");
       const game = await Game.findByPk(req.body.gameId, {
         include: [
           { model: Team, as: "homeTeam" },

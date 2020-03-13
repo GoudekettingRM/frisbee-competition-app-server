@@ -5,8 +5,10 @@ const Organisation = require("../organisation/model");
 const Competition = require("../competition/model");
 const CompetitionDay = require("../competition-day/model");
 const Team = require("../team/model");
+const User = require("../user/model");
 const SpiritScore = require("../spirit-score/model");
 const { return400, return403, return404 } = require("../returnStatusCodes");
+const { getUserRole } = require("../rbac-helpers");
 const {
   spiritCaptain,
   teamCaptain,
@@ -24,14 +26,14 @@ router.post("/games", auth, async (req, res, next) => {
       const newGame = await Game.findByPk(createdGame.id, {
         include: [
           Competition,
-          { model: Team, as: "homeTeam" },
-          { model: Team, as: "awayTeam" },
+          { model: Team, as: "homeTeam", include: [User] },
+          { model: Team, as: "awayTeam", include: [User] },
           CompetitionDay,
           { model: SpiritScore, as: "homeTeamReceivedSpiritScore" },
           { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
         ]
       });
-      return res.json(newGame);
+      return res.json({ message: "New game created successfully", newGame });
     } else {
       if (!req.user.organisationId) {
         return return403(res);
@@ -60,14 +62,14 @@ router.post("/games", auth, async (req, res, next) => {
         const newGame = await Game.findByPk(createdGame.id, {
           include: [
             Competition,
-            { model: Team, as: "homeTeam" },
-            { model: Team, as: "awayTeam" },
+            { model: Team, as: "homeTeam", include: [User] },
+            { model: Team, as: "awayTeam", include: [User] },
             CompetitionDay,
             { model: SpiritScore, as: "homeTeamReceivedSpiritScore" },
             { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
           ]
         });
-        return res.json(newGame);
+        return res.json({ message: "New game created successfully", newGame });
       } else {
         return return403(res);
       }
@@ -83,8 +85,8 @@ router.get("/games/:id", async (req, res, next) => {
     const game = await Game.findByPk(gameId, {
       include: [
         Competition,
-        { model: Team, as: "homeTeam" },
-        { model: Team, as: "awayTeam" },
+        { model: Team, as: "homeTeam", include: [User] },
+        { model: Team, as: "awayTeam", include: [User] },
         CompetitionDay,
         { model: SpiritScore, as: "homeTeamReceivedSpiritScore" },
         { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
@@ -103,9 +105,7 @@ router.patch("/games/:id", auth, async (req, res, next) => {
     const admins = [federation, superAdmin];
     const teamUsers = [spiritCaptain, teamCaptain, clubBoard];
     const gameId = req.params.id;
-    const userRoleId = req.user.organisation
-      ? req.user.organisation.roleId
-      : req.user.roleId;
+    const userRoleId = getUserRole(req.user);
 
     const gameToUpdate = await Game.findByPk(gameId, {
       include: [
@@ -148,14 +148,14 @@ router.patch("/games/:id", auth, async (req, res, next) => {
         const updatedGame = await Game.findByPk(gameId, {
           include: [
             Competition,
-            { model: Team, as: "homeTeam" },
-            { model: Team, as: "awayTeam" },
+            { model: Team, as: "homeTeam", include: [User] },
+            { model: Team, as: "awayTeam", include: [User] },
             CompetitionDay,
             { model: SpiritScore, as: "homeTeamReceivedSpiritScore" },
             { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
           ]
         });
-        return res.send(updatedGame);
+        return res.send({ message: "Game updated successfully", updatedGame });
       }
     } else if (admins.includes(userRoleId)) {
       await Game.update(req.body, {
@@ -164,14 +164,14 @@ router.patch("/games/:id", auth, async (req, res, next) => {
       const updatedGame = await Game.findByPk(gameId, {
         include: [
           Competition,
-          { model: Team, as: "homeTeam" },
-          { model: Team, as: "awayTeam" },
+          { model: Team, as: "homeTeam", include: [User] },
+          { model: Team, as: "awayTeam", include: [User] },
           CompetitionDay,
           { model: SpiritScore, as: "homeTeamReceivedSpiritScore" },
           { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
         ]
       });
-      return res.send(updatedGame);
+      return res.send({ message: "Game updated successfully", updatedGame });
     } else {
       return return403(res);
     }

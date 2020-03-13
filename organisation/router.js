@@ -28,7 +28,7 @@ router.post("/organisations", auth, async (req, res, next) => {
     );
     res.json({
       message:
-        "New organisation created successfully. User has been registered as contact for organisation.",
+        "New organisation created successfully. You has been registered as contact for organisation.",
       newOrganisation: completeNewOrganisation
     });
   } catch (error) {
@@ -38,7 +38,7 @@ router.post("/organisations", auth, async (req, res, next) => {
 
 router.patch("/organisations", auth, async (req, res, next) => {
   try {
-    console.log("req.user in organisations patch", req.user.organisation.id);
+    // console.log("req.user in organisations patch", req.user.organisation.id);
     await Organisation.update(req.body, {
       where: {
         id: req.user.organisation.id
@@ -47,8 +47,11 @@ router.patch("/organisations", auth, async (req, res, next) => {
     const updatedOrganisation = await Organisation.findByPk(
       req.user.organisation.id
     );
-    console.log("updatedOrganisation test", updatedOrganisation);
-    res.json(updatedOrganisation);
+    // console.log("updatedOrganisation test", updatedOrganisation);
+    res.json({
+      message: "Organisation updated successfully",
+      updatedOrganisation
+    });
   } catch (error) {
     next(error);
   }

@@ -9,7 +9,7 @@ function return400(res, missingData) {
 
 function return401(res) {
   return res
-    .status(400)
+    .status(401)
     .send({
       message: `Please provide valid credentials.`
     })
