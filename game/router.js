@@ -33,7 +33,7 @@ router.post("/games", auth, async (req, res, next) => {
           { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
         ]
       });
-      return res.json(newGame);
+      return res.json({ message: "New game created successfully", newGame });
     } else {
       if (!req.user.organisationId) {
         return return403(res);
@@ -69,7 +69,7 @@ router.post("/games", auth, async (req, res, next) => {
             { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
           ]
         });
-        return res.json(newGame);
+        return res.json({ message: "New game created successfully", newGame });
       } else {
         return return403(res);
       }
@@ -155,7 +155,7 @@ router.patch("/games/:id", auth, async (req, res, next) => {
             { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
           ]
         });
-        return res.send(updatedGame);
+        return res.send({ message: "Game updated successfully", updatedGame });
       }
     } else if (admins.includes(userRoleId)) {
       await Game.update(req.body, {
@@ -171,7 +171,7 @@ router.patch("/games/:id", auth, async (req, res, next) => {
           { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
         ]
       });
-      return res.send(updatedGame);
+      return res.send({ message: "Game updated successfully", updatedGame });
     } else {
       return return403(res);
     }

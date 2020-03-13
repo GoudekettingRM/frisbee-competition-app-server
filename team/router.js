@@ -28,7 +28,7 @@ router.post("/teams", auth, async (req, res, next) => {
       const team = await Team.create(newTeamData);
       team.setCompetitions([currentCompetition]);
 
-      res.json(team);
+      res.json({ message: "Team created successfully", team });
     }
   } catch (err) {
     next(err);
@@ -52,7 +52,9 @@ router.get("/teams/:id", async (req, res, next) => {
   try {
     const teamId = req.params.id;
     const team = await Team.findByPk(teamId, {
-      include: [{ model: User, attributes: ["firstName", "lastName"] }]
+      include: [
+        { model: User, attributes: ["firstName", "lastName", "roleId"] }
+      ]
     });
     if (!team) {
       return return404(res, "Team not found");

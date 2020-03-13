@@ -52,7 +52,7 @@ async function createSpiritScoreInDbAndSendResponse(
     ]
   });
 
-  res.json(updatedGame);
+  res.json({ message: "Spirit score added successfully", updatedGame });
 }
 async function updateSpiritInDbAndSendResponse(
   res,
@@ -63,7 +63,7 @@ async function updateSpiritInDbAndSendResponse(
   await SpiritScore.update(updatedSpiritData, {
     where: { id: spiritScoreId }
   });
-  const gameWithUpdatedSpirit = await Game.findByPk(gameId, {
+  const updatedGame = await Game.findByPk(gameId, {
     include: [
       Competition,
       { model: Team, as: "homeTeam", include: [User] },
@@ -73,7 +73,10 @@ async function updateSpiritInDbAndSendResponse(
       { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
     ]
   });
-  return res.json(gameWithUpdatedSpirit);
+  return res.json({
+    message: "Spirit score updated successfully",
+    updatedGame
+  });
 }
 function allowedToEditSpiritScore(spiritScoreFor, user, game, userRoleId) {
   if (userRoleId === spiritCaptain || userRoleId === teamCaptain) {
@@ -171,7 +174,7 @@ router.post("/spirit-scores", auth, async (req, res, next) => {
 
 router.patch("/spirit-scores/:id", auth, async (req, res, next) => {
   try {
-    console.log("Req.body from spirit-score PATCH", req.body);
+    // console.log("Req.body from spirit-score PATCH", req.body);
     const admins = [federation, superAdmin];
     const teamUsers = [spiritCaptain, teamCaptain, clubBoard];
     const spiritScoreId = req.params.id;
@@ -193,7 +196,7 @@ router.patch("/spirit-scores/:id", auth, async (req, res, next) => {
         req.body.gameId
       );
     } else if (teamUsers.includes(userRoleId)) {
-      console.log("Need to check if user is okay");
+      // console.log("Need to check if user is okay");
       const game = await Game.findByPk(req.body.gameId, {
         include: [
           { model: Team, as: "homeTeam" },
