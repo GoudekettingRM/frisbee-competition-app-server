@@ -5,7 +5,7 @@ const User = require("../user/model");
 const Competition = require("../competition/model");
 const CompetitionDay = require("../competition-day/model");
 const Team = require("../team/model");
-const { return400 } = require("../returnStatusCodes");
+const { return400 } = require("../helper-files/returnStatusCodes");
 
 const router = new Router();
 

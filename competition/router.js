@@ -6,8 +6,11 @@ const Team = require("../team/model");
 const Game = require("../game/model");
 const SpiritScore = require("../spirit-score/model");
 const User = require("../user/model");
-const { return403, return404 } = require("../returnStatusCodes");
-const { federation, superAdmin } = require("../endpointRoles");
+const { return403, return404 } = require("../helper-files/returnStatusCodes");
+const {
+  federation,
+  superAdmin
+} = require("../helper-files/role-validations/endpointRoles");
 
 const router = new Router();
 

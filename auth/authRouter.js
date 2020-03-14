@@ -6,7 +6,7 @@ const Organisation = require("../organisation/model");
 const Team = require("../team/model");
 const Competition = require("../competition/model");
 const CompetitionDay = require("../competition-day/model");
-const { return400, return401 } = require("../returnStatusCodes");
+const { return400, return401 } = require("../helper-files/returnStatusCodes");
 
 const router = new Router();
 

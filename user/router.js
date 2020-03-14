@@ -5,7 +5,7 @@ const { auth } = require("../auth/authMiddleware");
 const User = require("./model");
 const Organisation = require("../organisation/model");
 const Team = require("../team/model");
-const { return400, return404 } = require("../returnStatusCodes");
+const { return400, return404 } = require("../helper-files/returnStatusCodes");
 
 const router = new Router();
 

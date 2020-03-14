@@ -7,15 +7,21 @@ const CompetitionDay = require("../competition-day/model");
 const Team = require("../team/model");
 const User = require("../user/model");
 const SpiritScore = require("../spirit-score/model");
-const { return400, return403, return404 } = require("../returnStatusCodes");
-const { getUserRole } = require("../rbac-helpers");
+const {
+  return400,
+  return403,
+  return404
+} = require("../helper-files/returnStatusCodes");
+const {
+  getUserRole
+} = require("../helper-files/role-validations/rbac-helpers");
 const {
   spiritCaptain,
   teamCaptain,
   clubBoard,
   federation,
   superAdmin
-} = require("../endpointRoles");
+} = require("../helper-files/role-validations/endpointRoles");
 
 const router = new Router();
 
@@ -123,12 +129,9 @@ router.patch("/games/:id", auth, async (req, res, next) => {
       } else {
         const { homeTeam, awayTeam } = gameToUpdate;
         const teamByUserOrganisation =
-          userRoleId === clubBoard
-            ? homeTeam.organisationId === req.user.organisationId ||
-              awayTeam.organisationId === req.user.organisationId
-              ? true
-              : false
-            : false;
+          userRoleId === clubBoard &&
+          (homeTeam.organisationId === req.user.organisationId ||
+            awayTeam.organisationId === req.user.organisationId);
 
         if (
           admins.includes(userRoleId) ||

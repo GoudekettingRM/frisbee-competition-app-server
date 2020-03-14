@@ -3,8 +3,10 @@ const { auth } = require("../auth/authMiddleware");
 const Team = require("./model");
 const User = require("../user/model");
 const Competition = require("../competition/model");
-const { superAdmin } = require("../endpointRoles");
-const { return403, return404 } = require("../returnStatusCodes");
+const {
+  superAdmin
+} = require("../helper-files/role-validations/endpointRoles");
+const { return403, return404 } = require("../helper-files/returnStatusCodes");
 
 const router = new Router();
 

@@ -2,7 +2,11 @@ const User = require("../user/model");
 const Organisation = require("../organisation/model");
 const Team = require("../team/model");
 const { toData } = require("./jwt");
-const { return400, return401, return403 } = require("../returnStatusCodes");
+const {
+  return400,
+  return401,
+  return403
+} = require("../helper-files/returnStatusCodes");
 
 function blockEndpoint(req, res, next) {
   return return403(res);
