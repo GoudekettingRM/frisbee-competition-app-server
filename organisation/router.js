@@ -1,8 +1,8 @@
 const { Router } = require("express");
 const { auth } = require("../auth/authMiddleware");
-const User = require("../user/model");
 const { createOrganisation, updateOrganisation } = require("./queries");
 const { return400 } = require("../helper-files/returnStatusCodes");
+const { updateUser } = require("../user/queries");
 
 const router = new Router();
 
@@ -13,10 +13,7 @@ router.post("/organisations", auth, async (req, res, next) => {
     }
     const tempOrganisation = await createOrganisation(req.body);
 
-    await User.update(
-      { organisationId: tempOrganisation.id },
-      { where: { id: req.user.id } }
-    );
+    await updateUser({ organisationId: tempOrganisation.id }, req.user.id);
 
     const newOrganisation = await getOneOrganisation(tempOrganisation.id);
     return res.json({

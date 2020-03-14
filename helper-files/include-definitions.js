@@ -4,6 +4,7 @@ const Competition = require("../competition/model");
 const CompetitionDay = require("../competition-day/model");
 const SpiritScore = require("../spirit-score/model");
 const Game = require("../game/model");
+const Organisation = require("../organisation/model");
 
 const gameInclude = {
   include: [
@@ -37,4 +38,18 @@ const organisationInclude = {
   include: [{ model: Competition, include: [CompetitionDay] }]
 };
 
-module.exports = { gameInclude, competitionInclude, organisationInclude };
+const userInclude = {
+  include: [Organisation, Team]
+};
+
+const teamInclude = {
+  include: [{ model: User, attributes: ["firstName", "lastName", "roleId"] }]
+};
+
+module.exports = {
+  gameInclude,
+  competitionInclude,
+  organisationInclude,
+  userInclude,
+  teamInclude
+};
