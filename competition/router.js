@@ -1,12 +1,12 @@
 const { Router } = require("express");
 const { auth } = require("../auth/authMiddleware");
-const Competition = require("./model");
-const CompetitionDay = require("../competition-day/model");
-const Team = require("../team/model");
-const Game = require("../game/model");
-const SpiritScore = require("../spirit-score/model");
-const User = require("../user/model");
 const { return403, return404 } = require("../helper-files/returnStatusCodes");
+const {
+  getAllCompetitions,
+  getOneCompetition,
+  createCompetition
+} = require("./queries");
+const { createCompetitionDay } = require("../competition-day/queries");
 const {
   federation,
   superAdmin
@@ -18,36 +18,22 @@ router.post("/competitions", auth, async (req, res, next) => {
   try {
     const rolesAllowed = [federation, superAdmin];
     if (rolesAllowed.includes(req.user.organisation.roleId)) {
-      const newCompetitionReference = await Competition.create(req.body);
-
       if (!req.body.competitionDayDates.length) {
-        return res.json({
-          message: "Competition created. NB: No competition days were added.",
-          newCompetition: newCompetitionReference
-        });
+        return return400(
+          res,
+          "You need to add competition days if you want to create a competition."
+        );
       } else {
+        const tempCompetition = await createCompetition(req.body);
         const competitionDays = req.body.competitionDayDates;
 
         await Promise.all(
-          competitionDays.map(
-            async date =>
-              await CompetitionDay.create({
-                date,
-                competitionId: newCompetitionReference.id
-              })
+          competitionDays.map(date =>
+            createCompetitionDay(date, tempCompetition.id)
           )
         );
 
-        const newCompetition = await Competition.findByPk(
-          newCompetitionReference.id,
-          {
-            include: [
-              CompetitionDay,
-              { model: Team, include: [Competition] },
-              Game
-            ]
-          }
-        );
+        const newCompetition = await getOneCompetition(tempCompetition.id);
 
         return res.json({
           message: "New competition created successfully",
@@ -64,22 +50,8 @@ router.post("/competitions", auth, async (req, res, next) => {
 
 router.get("/competitions", async (req, res, next) => {
   try {
-    const competitions = await Competition.findAll({
-      include: [
-        CompetitionDay,
-        { model: Team, include: [Competition, User] },
-        {
-          model: Game,
-          include: [
-            { model: Team, as: "homeTeam" },
-            { model: Team, as: "awayTeam" },
-            CompetitionDay,
-            { model: SpiritScore, as: "homeTeamReceivedSpiritScore" },
-            { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
-          ]
-        }
-      ]
-    });
+    const competitions = await getAllCompetitions();
+
     if (!competitions.length) {
       return return404(res, "No competition found");
     } else {
@@ -92,22 +64,8 @@ router.get("/competitions", async (req, res, next) => {
 
 router.get("/competitions/:id", async (req, res, next) => {
   try {
-    const competition = await Competition.findByPk(req.params.id, {
-      include: [
-        CompetitionDay,
-        { model: Team, include: [Competition, User] },
-        {
-          model: Game,
-          include: [
-            { model: Team, as: "homeTeam" },
-            { model: Team, as: "awayTeam" },
-            CompetitionDay,
-            { model: SpiritScore, as: "homeTeamReceivedSpiritScore" },
-            { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
-          ]
-        }
-      ]
-    });
+    const competition = await getOneCompetition(req.params.id);
+
     if (!competition) {
       return return404(res, "Competition not found");
     } else {

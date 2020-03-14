@@ -1,10 +1,7 @@
 const { Router } = require("express");
 const { auth } = require("../auth/authMiddleware");
-const Organisation = require("./model");
 const User = require("../user/model");
-const Competition = require("../competition/model");
-const CompetitionDay = require("../competition-day/model");
-const Team = require("../team/model");
+const { createOrganisation, updateOrganisation } = require("./queries");
 const { return400 } = require("../helper-files/returnStatusCodes");
 
 const router = new Router();
@@ -14,22 +11,18 @@ router.post("/organisations", auth, async (req, res, next) => {
     if (req.user.organisationId) {
       return return400(res, "User already contact for one organisation");
     }
-    const newOrganisation = await Organisation.create(req.body);
+    const tempOrganisation = await createOrganisation(req.body);
+
     await User.update(
-      { organisationId: newOrganisation.id },
+      { organisationId: tempOrganisation.id },
       { where: { id: req.user.id } }
     );
 
-    const completeNewOrganisation = await Organisation.findByPk(
-      newOrganisation.id,
-      {
-        include: [{ model: Competition, include: [CompetitionDay] }]
-      }
-    );
-    res.json({
+    const newOrganisation = await getOneOrganisation(tempOrganisation.id);
+    return res.json({
       message:
         "New organisation created successfully. You has been registered as contact for organisation.",
-      newOrganisation: completeNewOrganisation
+      newOrganisation
     });
   } catch (error) {
     next(error);
@@ -38,17 +31,12 @@ router.post("/organisations", auth, async (req, res, next) => {
 
 router.patch("/organisations", auth, async (req, res, next) => {
   try {
-    // console.log("req.user in organisations patch", req.user.organisation.id);
-    await Organisation.update(req.body, {
-      where: {
-        id: req.user.organisation.id
-      }
-    });
-    const updatedOrganisation = await Organisation.findByPk(
+    await updateOrganisation(req.body, req.user.organisation.id);
+    const updatedOrganisation = await getOneOrganisation(
       req.user.organisation.id
     );
-    // console.log("updatedOrganisation test", updatedOrganisation);
-    res.json({
+
+    return res.json({
       message: "Organisation updated successfully",
       updatedOrganisation
     });

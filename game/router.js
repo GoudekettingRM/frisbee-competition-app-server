@@ -1,12 +1,7 @@
 const { Router } = require("express");
 const { auth } = require("../auth/authMiddleware");
-const Game = require("./model");
-const Organisation = require("../organisation/model");
-const Competition = require("../competition/model");
-const CompetitionDay = require("../competition-day/model");
-const Team = require("../team/model");
-const User = require("../user/model");
-const SpiritScore = require("../spirit-score/model");
+const { createGame, getGame, updateGame } = require("./queries");
+const { getOneOrganisation } = require("../organisation/queries");
 const {
   return400,
   return403,
@@ -28,28 +23,16 @@ const router = new Router();
 router.post("/games", auth, async (req, res, next) => {
   try {
     if (req.user.roleId === superAdmin) {
-      const createdGame = await Game.create(req.body);
-      const newGame = await Game.findByPk(createdGame.id, {
-        include: [
-          Competition,
-          { model: Team, as: "homeTeam", include: [User] },
-          { model: Team, as: "awayTeam", include: [User] },
-          CompetitionDay,
-          { model: SpiritScore, as: "homeTeamReceivedSpiritScore" },
-          { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
-        ]
-      });
+      const createdGame = await createGame(req.body);
+      const newGame = await getGame(createdGame.id);
       return res.json({ message: "New game created successfully", newGame });
     } else {
       if (!req.user.organisationId) {
         return return403(res);
       }
 
-      const userOrganisation = await Organisation.findByPk(
-        req.user.organisationId,
-        {
-          include: [Competition]
-        }
+      const userOrganisation = await getOneOrganisation(
+        req.user.organisationId
       );
 
       if (!userOrganisation) {
@@ -64,17 +47,9 @@ router.post("/games", auth, async (req, res, next) => {
         rolesAllowed.includes(userOrganisation.roleId) &&
         competitionByUserOrganisation
       ) {
-        const createdGame = await Game.create(req.body);
-        const newGame = await Game.findByPk(createdGame.id, {
-          include: [
-            Competition,
-            { model: Team, as: "homeTeam", include: [User] },
-            { model: Team, as: "awayTeam", include: [User] },
-            CompetitionDay,
-            { model: SpiritScore, as: "homeTeamReceivedSpiritScore" },
-            { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
-          ]
-        });
+        const createdGame = await createGame(req.body);
+        const newGame = await getGame(createdGame.id);
+
         return res.json({ message: "New game created successfully", newGame });
       } else {
         return return403(res);
@@ -87,17 +62,8 @@ router.post("/games", auth, async (req, res, next) => {
 
 router.get("/games/:id", async (req, res, next) => {
   try {
-    const gameId = req.params.id;
-    const game = await Game.findByPk(gameId, {
-      include: [
-        Competition,
-        { model: Team, as: "homeTeam", include: [User] },
-        { model: Team, as: "awayTeam", include: [User] },
-        CompetitionDay,
-        { model: SpiritScore, as: "homeTeamReceivedSpiritScore" },
-        { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
-      ]
-    });
+    const game = await getGame(req.params.id);
+
     if (!game) return return404(res, "Game not found");
 
     res.send(game);
@@ -113,12 +79,7 @@ router.patch("/games/:id", auth, async (req, res, next) => {
     const gameId = req.params.id;
     const userRoleId = getUserRole(req.user);
 
-    const gameToUpdate = await Game.findByPk(gameId, {
-      include: [
-        { model: Team, as: "homeTeam" },
-        { model: Team, as: "awayTeam" }
-      ]
-    });
+    const gameToUpdate = await getGame(gameId);
 
     if (req.headers.scoring) {
       if (!req.body.homeTeamScore || !req.body.awayTeamScore) {
@@ -140,40 +101,21 @@ router.patch("/games/:id", auth, async (req, res, next) => {
               req.user.teamId === gameToUpdate.awayTeamId ||
               teamByUserOrganisation))
         ) {
-          await Game.update(
-            {
-              homeTeamScore: req.body.homeTeamScore,
-              awayTeamScore: req.body.awayTeamScore
-            },
-            { where: { id: gameId } }
-          );
+          const gameUpdateData = {
+            homeTeamScore: req.body.homeTeamScore,
+            awayTeamScore: req.body.awayTeamScore
+          };
+          await updateGame(gameUpdateData, gameId);
         }
-        const updatedGame = await Game.findByPk(gameId, {
-          include: [
-            Competition,
-            { model: Team, as: "homeTeam", include: [User] },
-            { model: Team, as: "awayTeam", include: [User] },
-            CompetitionDay,
-            { model: SpiritScore, as: "homeTeamReceivedSpiritScore" },
-            { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
-          ]
-        });
+        const updatedGame = await getGame(gameId);
+
         return res.send({ message: "Game updated successfully", updatedGame });
       }
     } else if (admins.includes(userRoleId)) {
-      await Game.update(req.body, {
-        where: { id: gameId }
-      });
-      const updatedGame = await Game.findByPk(gameId, {
-        include: [
-          Competition,
-          { model: Team, as: "homeTeam", include: [User] },
-          { model: Team, as: "awayTeam", include: [User] },
-          CompetitionDay,
-          { model: SpiritScore, as: "homeTeamReceivedSpiritScore" },
-          { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
-        ]
-      });
+      await updateGame(req.body, gameId);
+
+      const updatedGame = await getGame(gameId);
+
       return res.send({ message: "Game updated successfully", updatedGame });
     } else {
       return return403(res);

@@ -5,8 +5,8 @@ const {
   getUserRole,
   canEditSpirit
 } = require("../helper-files/role-validations/rbac-helpers");
+const { getGame } = require("../game/queries");
 const {
-  getGame,
   updateGameSpiritId,
   createNewSpirit,
   updateSpirit
@@ -37,7 +37,7 @@ router.post("/spirit-scores", auth, async (req, res, next) => {
     } = req.body;
     const spiritTotal = RKUScore + FNBScore + FMScore + PASCScore + COMMScore;
     const spiritDataWithTotal = { ...req.body, spiritTotal };
-    const gameToScore = getGame(gameId);
+    const gameToScore = await getGame(gameId);
 
     if (admins.includes(userRoleId)) {
       if (spiritScoreFor === "home") {
@@ -48,9 +48,9 @@ router.post("/spirit-scores", auth, async (req, res, next) => {
             ...spiritDataWithTotal,
             teamId: gameToScore.homeTeamId
           };
-          const newSpiritScore = createNewSpirit(spiritData);
-          updateGameSpiritId(spiritScoreFor, newSpiritScore.id, gameId);
-          const updatedGame = getGame(gameId);
+          const newSpiritScore = await createNewSpirit(spiritData);
+          await updateGameSpiritId(spiritScoreFor, newSpiritScore.id, gameId);
+          const updatedGame = await getGame(gameId);
 
           return res.json({
             message: "Spirit score added successfully",
@@ -65,9 +65,9 @@ router.post("/spirit-scores", auth, async (req, res, next) => {
             ...spiritDataWithTotal,
             teamId: gameToScore.awayTeamId
           };
-          const newSpiritScore = createNewSpirit(spiritData);
-          updateGameSpiritId(spiritScoreFor, newSpiritScore.id, gameId);
-          const updatedGame = getGame(gameId);
+          const newSpiritScore = await createNewSpirit(spiritData);
+          await updateGameSpiritId(spiritScoreFor, newSpiritScore.id, gameId);
+          const updatedGame = await getGame(gameId);
 
           return res.json({
             message: "Spirit score added successfully",
@@ -84,9 +84,9 @@ router.post("/spirit-scores", auth, async (req, res, next) => {
             ...spiritDataWithTotal,
             teamId: gameToScore.awayTeamId
           };
-          const newSpiritScore = createNewSpirit(spiritData);
-          updateGameSpiritId("away", newSpiritScore.id, gameId);
-          const updatedGame = getGame(gameId);
+          const newSpiritScore = await createNewSpirit(spiritData);
+          await updateGameSpiritId("away", newSpiritScore.id, gameId);
+          const updatedGame = await getGame(gameId);
 
           return res.json({
             message: "Spirit score added successfully",
@@ -101,9 +101,9 @@ router.post("/spirit-scores", auth, async (req, res, next) => {
             ...spiritDataWithTotal,
             teamId: gameToScore.homeTeamId
           };
-          const newSpiritScore = createNewSpirit(spiritData);
-          updateGameSpiritId("home", newSpiritScore.id, gameId);
-          const updatedGame = getGame(gameId);
+          const newSpiritScore = await createNewSpirit(spiritData);
+          await updateGameSpiritId("home", newSpiritScore.id, gameId);
+          const updatedGame = await getGame(gameId);
 
           return res.json({
             message: "Spirit score added successfully",
@@ -145,17 +145,17 @@ router.patch("/spirit-scores/:id", auth, async (req, res, next) => {
     };
 
     if (admins.includes(userRoleId)) {
-      updateSpirit(updatedSpiritData, spiritScoreId);
-      const updatedGame = getGame(gameId);
+      await updateSpirit(updatedSpiritData, spiritScoreId);
+      const updatedGame = await getGame(gameId);
       return res.json({
         message: "Spirit score updated successfully",
         updatedGame
       });
     } else if (teamUsers.includes(userRoleId)) {
-      const game = getGame(gameId);
+      const game = await getGame(gameId);
       if (canEditSpirit(spiritScoreFor, req.user, game, userRoleId)) {
-        updateSpirit(updatedSpiritData, spiritScoreId);
-        const updatedGame = getGame(gameId);
+        await updateSpirit(updatedSpiritData, spiritScoreId);
+        const updatedGame = await getGame(gameId);
         return res.json({
           message: "Spirit score updated successfully",
           updatedGame
