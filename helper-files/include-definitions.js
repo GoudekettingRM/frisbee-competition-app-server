@@ -9,8 +9,16 @@ const Organisation = require("../organisation/model");
 const gameInclude = {
   include: [
     Competition,
-    { model: Team, as: "homeTeam", include: [User] },
-    { model: Team, as: "awayTeam", include: [User] },
+    {
+      model: Team,
+      as: "homeTeam",
+      include: [{ model: User, attributes: { exclude: ["password"] } }]
+    },
+    {
+      model: Team,
+      as: "awayTeam",
+      include: [{ model: User, attributes: { exclude: ["password"] } }]
+    },
     CompetitionDay,
     { model: SpiritScore, as: "homeTeamReceivedSpiritScore" },
     { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
@@ -20,7 +28,13 @@ const gameInclude = {
 const competitionInclude = {
   include: [
     CompetitionDay,
-    { model: Team, include: [Competition, User] },
+    {
+      model: Team,
+      include: [
+        Competition,
+        { model: User, attributes: { exclude: ["password"] } }
+      ]
+    },
     {
       model: Game,
       include: [
@@ -39,11 +53,12 @@ const organisationInclude = {
 };
 
 const userInclude = {
-  include: [Organisation, Team]
+  include: [Organisation, Team],
+  attributes: { exclude: ["password"] }
 };
 
 const teamInclude = {
-  include: [{ model: User, attributes: ["firstName", "lastName", "roleId"] }]
+  include: [{ model: User, attributes: { exclude: ["password"] } }]
 };
 
 module.exports = {
