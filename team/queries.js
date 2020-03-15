@@ -13,4 +13,4 @@ const getAllTeams = async () => {
   return await Team.findAll();
 };
 
-module.exports = { createTeam, getAllTeams };
+module.exports = { createTeam, getAllTeams, getOneTeam };
