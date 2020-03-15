@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 const { toJWT } = require("../auth/jwt");
 const { auth } = require("../auth/authMiddleware");
 const { return400, return404 } = require("../helper-files/returnStatusCodes");
-const { createUser, updateUser, getOneUser } = require("./queries");
+const { createUser, updateUser, getSpecificUser } = require("./queries");
 
 const router = new Router();
 
@@ -55,7 +55,7 @@ router.patch("/users", auth, async (req, res, next) => {
   try {
     await updateUser(req.body, req.user.id);
 
-    const updatedUser = await getOneUser(req.user.id);
+    const updatedUser = await getSpecificUser(req.user.id);
 
     return res.json({
       message: "User updated successfully",

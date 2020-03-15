@@ -1,12 +1,8 @@
 const { Router } = require("express");
 const bcrypt = require("bcrypt");
 const { toJWT } = require("./jwt");
-const User = require("../user/model");
-const Organisation = require("../organisation/model");
-const Team = require("../team/model");
-const Competition = require("../competition/model");
-const CompetitionDay = require("../competition-day/model");
 const { return400, return401 } = require("../helper-files/returnStatusCodes");
+const { getOneUser } = require("../user/queries");
 
 const router = new Router();
 
@@ -16,18 +12,7 @@ router.post("/login", async (req, res, next) => {
     return return400(res, "No login data provided.");
   }
   try {
-    const user = await User.findOne({
-      where: {
-        email
-      },
-      include: [
-        {
-          model: Organisation,
-          include: [{ model: Competition, include: [CompetitionDay] }]
-        },
-        Team
-      ]
-    });
+    const user = await getOneUser({ email });
     if (!user) {
       return return401(res);
     } else if (bcrypt.compareSync(password, user.password)) {

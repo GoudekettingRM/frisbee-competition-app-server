@@ -53,7 +53,13 @@ const organisationInclude = {
 };
 
 const userInclude = {
-  include: [Organisation, Team],
+  include: [
+    {
+      model: Organisation,
+      include: [{ model: Competition, include: [CompetitionDay] }]
+    },
+    { model: Team, include: [Competition] }
+  ],
   attributes: { exclude: ["password"] }
 };
 
