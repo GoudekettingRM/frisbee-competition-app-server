@@ -18,14 +18,11 @@ router.post("/login", async (req, res, next) => {
     if (!user) {
       return return401(res);
     } else if (bcrypt.compareSync(password, user.password)) {
-      const { password, ...userData } = user.dataValues;
-      res
-        .send({
-          message: "Login successful.",
-          jwt: toJWT({ userId: user.id }),
-          user: { ...userData }
-        })
-        .end();
+      return res.json({
+        message: "Login successful.",
+        jwt: toJWT({ userId: user.id }),
+        user
+      });
     } else {
       return return401(res);
     }
