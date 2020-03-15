@@ -10,7 +10,7 @@ const getSpecificUser = async userId => {
 };
 
 const getOneUser = async whereQuery => {
-  return await User.findOne({ where: whereQuery }, userInclude);
+  return await User.findOne(whereQuery, userInclude);
 };
 
 const updateUser = async (updateData, userId) => {
