@@ -12,7 +12,7 @@ const getSpecificUser = async userId => {
   return await User.findByPk(userId, userInclude);
 };
 
-const getOneUser = async ({ where }) => {
+const getUserForLogin = async ({ where }) => {
   return await User.findOne({ where, ...userLoginInclude });
 };
 
@@ -20,4 +20,4 @@ const updateUser = async (updateData, userId) => {
   return await User.update(updateData, { where: { id: userId } });
 };
 
-module.exports = { updateUser, createUser, getSpecificUser, getOneUser };
+module.exports = { updateUser, createUser, getSpecificUser, getUserForLogin };
