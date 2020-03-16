@@ -52,6 +52,16 @@ const organisationInclude = {
   include: [{ model: Competition, include: [CompetitionDay] }]
 };
 
+const userLoginInclude = {
+  include: [
+    {
+      model: Organisation,
+      include: [{ model: Competition, include: [CompetitionDay] }]
+    },
+    { model: Team, include: [Competition] }
+  ]
+};
+
 const userInclude = {
   include: [
     {
@@ -72,5 +82,6 @@ module.exports = {
   competitionInclude,
   organisationInclude,
   userInclude,
-  teamInclude
+  teamInclude,
+  userLoginInclude
 };
