@@ -1,11 +1,23 @@
 const express = require("express");
 const cors = require("cors");
-const db = require("./db");
+
+const authRouter = require("./auth/authRouter");
+const roleRouter = require("./role/router");
+const userRouter = require("./user/router");
+const teamRouter = require("./team/router");
+const competitionRouter = require("./competition/router");
+const organisationRouter = require("./organisation/router");
+const competitionDayRouter = require("./competition-day/router");
+const gameRouter = require("./game/router");
+const spiritScoreRouter = require("./spirit-score/router");
+
 const app = express();
 const port = process.env.PORT || 4000;
 
 // ----------------------------- FUNCTIONS GO HERE --------------------------- //
-function onListen() {console.log(`Listening on port ${port}!`);}
+function onListen() {
+  console.log(`Listening on port ${port}!`);
+}
 
 // ----------------------------- MIDDLEWARE GOES HERE--------------------------- //
 const corsMiddleware = cors();
@@ -15,5 +27,14 @@ const jsonMiddleware = express.json();
 app.use(jsonMiddleware);
 
 // ----------------------------- ROUTERS GO HERE--------------------------- //
+app.use(authRouter);
+app.use(roleRouter);
+app.use(userRouter);
+app.use(teamRouter);
+app.use(competitionRouter);
+app.use(organisationRouter);
+app.use(competitionDayRouter);
+app.use(gameRouter);
+app.use(spiritScoreRouter);
 
 app.listen(port, onListen);
