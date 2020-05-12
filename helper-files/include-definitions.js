@@ -1,27 +1,27 @@
-const Team = require("../team/model");
-const User = require("../user/model");
-const Competition = require("../competition/model");
-const CompetitionDay = require("../competition-day/model");
-const SpiritScore = require("../spirit-score/model");
-const Game = require("../game/model");
-const Organisation = require("../organisation/model");
+const Team = require('../team/model');
+const User = require('../user/model');
+const Competition = require('../competition/model');
+const CompetitionDay = require('../competition-day/model');
+const SpiritScore = require('../spirit-score/model');
+const Game = require('../game/model');
+const Organisation = require('../organisation/model');
 
 const gameInclude = {
   include: [
     Competition,
     {
       model: Team,
-      as: "homeTeam",
-      include: [{ model: User, attributes: { exclude: ["password"] } }]
+      as: 'homeTeam',
+      include: [{ model: User, attributes: { exclude: ['password'] } }]
     },
     {
       model: Team,
-      as: "awayTeam",
-      include: [{ model: User, attributes: { exclude: ["password"] } }]
+      as: 'awayTeam',
+      include: [{ model: User, attributes: { exclude: ['password'] } }]
     },
     CompetitionDay,
-    { model: SpiritScore, as: "homeTeamReceivedSpiritScore" },
-    { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
+    { model: SpiritScore, as: 'homeTeamReceivedSpiritScore' },
+    { model: SpiritScore, as: 'awayTeamReceivedSpiritScore' }
   ]
 };
 
@@ -32,24 +32,37 @@ const competitionInclude = {
       model: Team,
       include: [
         Competition,
-        { model: User, attributes: { exclude: ["password"] } }
+        { model: User, attributes: { exclude: ['password'] } }
       ]
     },
     {
       model: Game,
       include: [
-        { model: Team, as: "homeTeam" },
-        { model: Team, as: "awayTeam" },
+        { model: Team, as: 'homeTeam' },
+        { model: Team, as: 'awayTeam' },
         CompetitionDay,
-        { model: SpiritScore, as: "homeTeamReceivedSpiritScore" },
-        { model: SpiritScore, as: "awayTeamReceivedSpiritScore" }
+        { model: SpiritScore, as: 'homeTeamReceivedSpiritScore' },
+        { model: SpiritScore, as: 'awayTeamReceivedSpiritScore' }
       ]
     }
   ]
 };
 
 const organisationInclude = {
-  include: [{ model: Competition, include: [CompetitionDay] }]
+  include: [
+    {
+      model: Competition,
+      exclude: [
+        'startDate',
+        'endDate',
+        'teamRegistrationDeadline',
+        'seedingDeadline',
+        'playersListDeadline',
+        'createdAt',
+        'updatedAt'
+      ]
+    }
+  ]
 };
 
 const userLoginInclude = {
@@ -70,11 +83,11 @@ const userInclude = {
     },
     { model: Team, include: [Competition] }
   ],
-  attributes: { exclude: ["password"] }
+  attributes: { exclude: ['password'] }
 };
 
 const teamInclude = {
-  include: [{ model: User, attributes: { exclude: ["password"] } }]
+  include: [{ model: User, attributes: { exclude: ['password'] } }]
 };
 
 module.exports = {
