@@ -1,6 +1,10 @@
 const { Router } = require('express');
 const { auth } = require('../auth/authMiddleware');
-const { createOrganisation, updateOrganisation } = require('./queries');
+const {
+  createOrganisation,
+  updateOrganisation,
+  getOneOrganisation
+} = require('./queries');
 const { return400 } = require('../helper-files/returnStatusCodes');
 const { updateUser } = require('../user/queries');
 
