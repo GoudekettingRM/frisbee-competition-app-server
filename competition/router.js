@@ -1,43 +1,43 @@
-const { Router } = require("express");
-const { auth } = require("../auth/authMiddleware");
-const { return403, return404 } = require("../helper-files/returnStatusCodes");
+const { Router } = require('express');
+const { auth } = require('../auth/authMiddleware');
+const { return403, return404 } = require('../helper-files/returnStatusCodes');
 const {
   getAllCompetitions,
   getOneCompetition,
-  createCompetition
-} = require("./queries");
-const { createCompetitionDay } = require("../competition-day/queries");
+  createCompetition,
+} = require('./queries');
+const { createCompetitionDay } = require('../competition-day/queries');
 const {
   federation,
-  superAdmin
-} = require("../helper-files/role-validations/endpointRoles");
+  superAdmin,
+} = require('../helper-files/role-validations/endpointRoles');
 
 const router = new Router();
 
-router.post("/competitions", auth, async (req, res, next) => {
+router.post('/competitions', auth, async (req, res, next) => {
   try {
     const rolesAllowed = [federation, superAdmin];
     if (rolesAllowed.includes(req.user.organisation.roleId)) {
       if (!req.body.competitionDayDates.length) {
         return return400(
           res,
-          "You need to add competition days if you want to create a competition."
+          'You need to add competition days if you want to create a competition.',
         );
       } else {
         const tempCompetition = await createCompetition(req.body);
         const competitionDays = req.body.competitionDayDates;
 
         await Promise.all(
-          competitionDays.map(date =>
-            createCompetitionDay(date, tempCompetition.id)
-          )
+          competitionDays.map((date) =>
+            createCompetitionDay(date, tempCompetition.id),
+          ),
         );
 
         const newCompetition = await getOneCompetition(tempCompetition.id);
 
         return res.json({
-          message: "New competition created successfully",
-          newCompetition
+          message: 'New competition created successfully',
+          newCompetition,
         });
       }
     } else {
@@ -48,26 +48,36 @@ router.post("/competitions", auth, async (req, res, next) => {
   }
 });
 
-router.get("/competitions", async (req, res, next) => {
+router.get('/competitions', async (req, res, next) => {
   try {
     const competitions = await getAllCompetitions();
 
     if (!competitions.length) {
-      return return404(res, "No competition found");
+      return return404(res, 'No competition found');
     } else {
-      return res.json(competitions);
+      const cleanedCompetitions = competitions.map((competition) => {
+        const cleanedTeams = competition.teams.map((team) => {
+          const { teamsInCompetitions, ...rest } = team.dataValues;
+          return rest;
+        });
+        return {
+          ...competition.dataValues,
+          teams: cleanedTeams,
+        };
+      });
+      return res.json(cleanedCompetitions);
     }
   } catch (error) {
     next(error);
   }
 });
 
-router.get("/competitions/:id", async (req, res, next) => {
+router.get('/competitions/:id', async (req, res, next) => {
   try {
     const competition = await getOneCompetition(req.params.id);
 
     if (!competition) {
-      return return404(res, "Competition not found");
+      return return404(res, 'Competition not found');
     } else {
       return res.json(competition);
     }

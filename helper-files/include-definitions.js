@@ -12,17 +12,17 @@ const gameInclude = {
     {
       model: Team,
       as: 'homeTeam',
-      include: [{ model: User, attributes: { exclude: ['password'] } }]
+      include: [{ model: User, attributes: { exclude: ['password'] } }],
     },
     {
       model: Team,
       as: 'awayTeam',
-      include: [{ model: User, attributes: { exclude: ['password'] } }]
+      include: [{ model: User, attributes: { exclude: ['password'] } }],
     },
     CompetitionDay,
     { model: SpiritScore, as: 'homeTeamReceivedSpiritScore' },
-    { model: SpiritScore, as: 'awayTeamReceivedSpiritScore' }
-  ]
+    { model: SpiritScore, as: 'awayTeamReceivedSpiritScore' },
+  ],
 };
 
 const competitionInclude = {
@@ -30,10 +30,7 @@ const competitionInclude = {
     CompetitionDay,
     {
       model: Team,
-      include: [
-        Competition,
-        { model: User, attributes: { exclude: ['password'] } }
-      ]
+      include: [{ model: User, attributes: { exclude: ['password'] } }],
     },
     {
       model: Game,
@@ -42,10 +39,10 @@ const competitionInclude = {
         { model: Team, as: 'awayTeam' },
         CompetitionDay,
         { model: SpiritScore, as: 'homeTeamReceivedSpiritScore' },
-        { model: SpiritScore, as: 'awayTeamReceivedSpiritScore' }
-      ]
-    }
-  ]
+        { model: SpiritScore, as: 'awayTeamReceivedSpiritScore' },
+      ],
+    },
+  ],
 };
 
 const organisationInclude = {
@@ -59,35 +56,35 @@ const organisationInclude = {
         'seedingDeadline',
         'playersListDeadline',
         'createdAt',
-        'updatedAt'
-      ]
-    }
-  ]
+        'updatedAt',
+      ],
+    },
+  ],
 };
 
 const userLoginInclude = {
   include: [
     {
       model: Organisation,
-      include: [{ model: Competition, include: [CompetitionDay] }]
+      include: [{ model: Competition, include: [CompetitionDay] }],
     },
-    { model: Team, include: [Competition] }
-  ]
+    { model: Team, include: [Competition] },
+  ],
 };
 
 const userInclude = {
   include: [
     {
       model: Organisation,
-      include: [{ model: Competition, include: [CompetitionDay] }]
+      include: [{ model: Competition, include: [CompetitionDay] }],
     },
-    { model: Team, include: [Competition] }
+    { model: Team, include: [Competition] },
   ],
-  attributes: { exclude: ['password'] }
+  attributes: { exclude: ['password'] },
 };
 
 const teamInclude = {
-  include: [{ model: User, attributes: { exclude: ['password'] } }]
+  include: [{ model: User, attributes: { exclude: ['password'] } }],
 };
 
 module.exports = {
@@ -96,5 +93,5 @@ module.exports = {
   organisationInclude,
   userInclude,
   teamInclude,
-  userLoginInclude
+  userLoginInclude,
 };
