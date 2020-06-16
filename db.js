@@ -2,9 +2,7 @@ const Sequelize = require('sequelize');
 const roles = require('./role/seedData');
 const standardUsers = require('./user/seedData');
 
-const databaseUrl =
-  process.env.DATABASE_URL ||
-  'postgres://postgres:secret@localhost:5432/postgres';
+const databaseUrl = process.env.DATABASE_URL || 'postgres://postgres:secret@localhost:5432/postgres';
 const db = new Sequelize(databaseUrl);
 
 async function syncDB() {
